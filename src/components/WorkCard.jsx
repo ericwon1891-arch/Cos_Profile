@@ -1,4 +1,6 @@
 export default function WorkCard({ work, onClick }) {
+  const isPhoto = work.type === 'photo'
+
   return (
     <div
       className="group cursor-pointer"
@@ -13,9 +15,15 @@ export default function WorkCard({ work, onClick }) {
           onError={e => { e.target.style.display = 'none' }}
         />
         <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-            <div className="w-0 h-0 border-l-[16px] border-l-white border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1" />
-          </div>
+          {isPhoto ? (
+            <div data-testid="photo-icon" className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-white rounded-sm" />
+            </div>
+          ) : (
+            <div data-testid="play-icon" className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+              <div className="w-0 h-0 border-l-[16px] border-l-white border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1" />
+            </div>
+          )}
         </div>
       </div>
       <div className="mt-2 px-1">
