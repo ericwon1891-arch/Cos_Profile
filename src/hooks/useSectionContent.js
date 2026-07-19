@@ -24,6 +24,11 @@ export function useSectionContent(section) {
         }
         setLoading(false)
       })
+      .catch((err) => {
+        if (cancelled) return
+        setError(err)
+        setLoading(false)
+      })
 
     return () => { cancelled = true }
   }, [section])

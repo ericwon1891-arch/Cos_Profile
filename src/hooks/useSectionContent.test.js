@@ -39,4 +39,20 @@ describe('useSectionContent', () => {
     expect(result.current.error).toEqual({ message: '실패' })
     expect(result.current.data).toBeNull()
   })
+
+  it('네트워크 실패로 promise reject 시 loading을 false로 하고 error를 설정한다', async () => {
+    const networkError = new Error('network error')
+    const single = vi.fn().mockRejectedValue(networkError)
+    const eq = vi.fn().mockReturnValue({ single })
+    const select = vi.fn().mockReturnValue({ eq })
+    supabase.from.mockReturnValue({ select })
+
+    const { result } = renderHook(() => useSectionContent('contact'))
+    expect(result.current.loading).toBe(true)
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.error).toEqual(networkError)
+    expect(result.current.data).toBeNull()
+  })
 })
