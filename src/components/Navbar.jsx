@@ -3,8 +3,9 @@ import { Link } from 'react-scroll'
 
 const NAV_LINKS = [
   { label: '소개', to: 'about' },
-  { label: '작업물', to: 'works' },
-  { label: '연락처', to: 'footer' },
+  { label: '경력', to: 'career' },
+  { label: '대표 캐릭터', to: 'characters' },
+  { label: 'Contact', to: 'contact' },
 ]
 
 export default function Navbar() {
@@ -27,7 +28,7 @@ export default function Navbar() {
           duration={500}
           className="text-white font-bold text-lg cursor-pointer"
         >
-          채수지
+          NANARY
         </Link>
         <div className="flex gap-6">
           {NAV_LINKS.map(({ label, to }) => (
