@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 
 export default function AdminLogin() {
   const { signIn } = useAuth()
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -18,6 +20,8 @@ export default function AdminLogin() {
     setLoading(false)
     if (signInError) {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+    } else {
+      navigate('/admin', { replace: true })
     }
   }
 
