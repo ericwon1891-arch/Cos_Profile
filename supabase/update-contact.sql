@@ -9,4 +9,6 @@ set data = $json${
   ]
 }$json$::jsonb,
     updated_at = now()
+
+
 where section = 'contact';
