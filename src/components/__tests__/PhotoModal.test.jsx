@@ -67,4 +67,17 @@ describe('PhotoModal', () => {
     fireEvent.click(screen.getByLabelText('다음 사진'))
     expect(screen.getByLabelText('다음 사진')).toBeDisabled()
   })
+
+  it('photos가 빈 문자열 슬롯만 있으면 대표 사진으로 대체된다', () => {
+    const work = { ...photoWork, photos: [''] }
+    render(<PhotoModal work={work} onClose={() => {}} />)
+    expect(screen.getByAltText('테스트 사진')).toHaveAttribute('src', '/photos/test.jpg')
+    expect(screen.queryByLabelText('다음 사진')).not.toBeInTheDocument()
+  })
+
+  it('photos에 빈 문자열 슬롯이 섞여 있으면 걸러내고 유효한 사진만 표시한다', () => {
+    const work = { ...galleryWork, photos: ['/photos/a.jpg', '', '/photos/b.jpg'] }
+    render(<PhotoModal work={work} onClose={() => {}} />)
+    expect(screen.getByText('1 / 2')).toBeInTheDocument()
+  })
 })

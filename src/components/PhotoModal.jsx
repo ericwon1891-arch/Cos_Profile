@@ -1,7 +1,8 @@
 import { useState } from 'react'
 
 export default function PhotoModal({ work, onClose }) {
-  const photos = work.photos?.length ? work.photos : [work.src].filter(Boolean)
+  const galleryPhotos = work.photos?.filter(Boolean) ?? []
+  const photos = galleryPhotos.length ? galleryPhotos : [work.src].filter(Boolean)
   const [index, setIndex] = useState(0)
   const hasMultiple = photos.length > 1
 
