@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useSectionContent } from '../hooks/useSectionContent'
 import WorkCard from './WorkCard'
-import VideoModal from './VideoModal'
 import PhotoModal from './PhotoModal'
 
 export default function CharactersSection() {
@@ -43,11 +42,8 @@ export default function CharactersSection() {
           ))}
         </div>
       </div>
-      {selectedWork && selectedWork.type === 'photo' && (
+      {selectedWork && (
         <PhotoModal key={selectedWork.id} work={selectedWork} onClose={() => setSelectedWork(null)} />
-      )}
-      {selectedWork && selectedWork.type !== 'photo' && (
-        <VideoModal work={selectedWork} onClose={() => setSelectedWork(null)} />
       )}
     </section>
   )

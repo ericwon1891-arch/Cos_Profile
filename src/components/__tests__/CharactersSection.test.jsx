@@ -45,7 +45,7 @@ describe('CharactersSection', () => {
     expect(screen.getAllByAltText('캐릭터 1')).toHaveLength(2)
   })
 
-  it('youtube 타입 카드 클릭 시 VideoModal이 열린다', () => {
+  it('youtube 타입 카드 클릭 시 모달에 영상 슬라이드가 열린다', () => {
     render(<CharactersSection />)
     fireEvent.click(screen.getAllByTestId('work-card')[2])
     expect(screen.getByTitle('video-player')).toBeInTheDocument()
