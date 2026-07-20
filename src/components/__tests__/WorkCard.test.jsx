@@ -47,6 +47,18 @@ describe('WorkCard', () => {
     expect(screen.getByTestId('photo-icon')).toBeInTheDocument()
   })
 
+  it('영상 없이 사진만 있고 type 필드가 없어도 확대 아이콘을 표시한다', () => {
+    const photoOnlyWork = {
+      id: 5,
+      title: '사진만 있는 캐릭터',
+      category: '카테고리 1',
+      photos: ['/photos/a.jpg'],
+      thumbnail: '/photos/a.jpg',
+    }
+    render(<WorkCard work={photoOnlyWork} onClick={() => {}} />)
+    expect(screen.getByTestId('photo-icon')).toBeInTheDocument()
+  })
+
   it('사진+영상 혼합일 때도 재생 아이콘을 표시한다', () => {
     const mixedWork = {
       id: 3,
