@@ -1,0 +1,28 @@
+import { useState } from 'react'
+import TextField from '../fields/TextField'
+import ListField from '../fields/ListField'
+
+export default function AvailableForm({ data, onSave }) {
+  const [form, setForm] = useState(data)
+
+  function update(key, value) {
+    setForm({ ...form, [key]: value })
+  }
+
+  return (
+    <form onSubmit={e => { e.preventDefault(); onSave(form) }}>
+      <TextField label="제목" value={form.heading} onChange={v => update('heading', v)} />
+      <ListField
+        label="태그"
+        items={form.tags}
+        onChange={items => update('tags', items)}
+        newItem="새 태그"
+        addLabel="태그 추가"
+        renderItem={({ item, index, onChange }) => (
+          <TextField label={`태그 ${index + 1}`} value={item} onChange={v => onChange(index, v)} />
+        )}
+      />
+      <button type="submit" className="bg-gray-900 text-white rounded px-4 py-2 text-sm">저장</button>
+    </form>
+  )
+}
