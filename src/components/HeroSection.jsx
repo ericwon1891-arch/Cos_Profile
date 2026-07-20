@@ -17,7 +17,7 @@ export default function HeroSection() {
       <img
         src={photo}
         alt={name}
-        className="absolute inset-0 w-full h-full object-cover opacity-40"
+        className="absolute inset-0 w-full h-full object-cover object-top md:object-center opacity-40"
         onError={e => { e.target.style.display = 'none' }}
       />
       <div className="relative flex flex-col items-center gap-4 max-w-2xl">

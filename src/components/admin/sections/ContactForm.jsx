@@ -12,7 +12,12 @@ export default function ContactForm({ data, onSave }) {
 
   return (
     <form onSubmit={e => { e.preventDefault(); onSave(form) }}>
-      <ImageField label="QR 코드 이미지" value={form.qrImage} onChange={v => update('qrImage', v)} />
+      <ImageField
+        label="QR 코드 이미지"
+        value={form.qrImage}
+        onChange={v => update('qrImage', v)}
+        hint="권장 크기: 512×512px 정사각형, 용량 200KB 이하"
+      />
       <ListField
         label="링크"
         items={form.links}
