@@ -30,16 +30,21 @@ export default function AdminDashboard() {
   const { signOut } = useAuth()
   const [activeKey, setActiveKey] = useState(SECTIONS[0].key)
   const { data, loading } = useSectionContent(activeKey)
-  const [status, setStatus] = useState('')
+  const [status, setStatus] = useState(null)
 
   async function handleSave(newData) {
-    setStatus('저장 중...')
+    setStatus({ type: 'pending', message: '저장 중...' })
     const { error } = await supabase
       .from('site_content')
       .update({ data: newData, updated_at: new Date().toISOString() })
       .eq('section', activeKey)
 
-    setStatus(error ? `저장 실패: ${error.message}` : '저장되었습니다.')
+    if (error) {
+      setStatus({ type: 'error', message: `저장 실패: ${error.message}` })
+      return
+    }
+    setStatus({ type: 'success', message: '저장되었습니다.' })
+    setTimeout(() => setStatus(null), 3000)
   }
 
   const active = SECTIONS.find(s => s.key === activeKey)
@@ -50,6 +55,16 @@ export default function AdminDashboard() {
         <h1 className="font-bold">포트폴리오 관리자</h1>
         <button onClick={signOut} className="text-sm text-gray-500 hover:underline">로그아웃</button>
       </header>
+      {status && (
+        <div
+          role="status"
+          className={`fixed top-4 right-4 z-50 px-4 py-2 rounded shadow-lg text-sm text-white ${
+            status.type === 'error' ? 'bg-red-600' : status.type === 'success' ? 'bg-green-600' : 'bg-gray-700'
+          }`}
+        >
+          {status.message}
+        </div>
+      )}
       <div className="flex">
         <nav className="w-48 bg-white border-r min-h-[calc(100vh-57px)] p-4">
           {SECTIONS.map(s => (
@@ -65,7 +80,6 @@ export default function AdminDashboard() {
           ))}
         </nav>
         <main className="flex-1 p-8 max-w-2xl">
-          {status && <p className="mb-4 text-sm text-gray-600">{status}</p>}
           {!loading && data && active && (
             <active.Form data={data} onSave={handleSave} />
           )}
