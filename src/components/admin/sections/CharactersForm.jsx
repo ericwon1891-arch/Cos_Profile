@@ -27,21 +27,20 @@ export default function CharactersForm({ data, onSave }) {
         label="캐릭터"
         items={form.items}
         onChange={items => update('items', items)}
-        newItem={{ id: Date.now(), title: '', category: form.categories[1] ?? '', type: 'photo', src: '', thumbnail: '', photos: [] }}
+        newItem={{ id: Date.now(), title: '', category: form.categories[1] ?? '', thumbnail: '', photos: [] }}
         addLabel="캐릭터 추가"
         renderItem={({ item, index, onChange }) => (
           <>
             <TextField label="캐릭터/작품명" value={item.title} onChange={v => onChange(index, { ...item, title: v })} />
             <TextField label="카테고리" value={item.category} onChange={v => onChange(index, { ...item, category: v })} />
-            <TextField label="타입 (photo/youtube/local)" value={item.type} onChange={v => onChange(index, { ...item, type: v })} />
             <ImageField
               label="사진 (카드 대표 사진)"
               value={item.thumbnail}
-              onChange={v => onChange(index, { ...item, thumbnail: v, src: item.type === 'photo' ? v : item.src })}
+              onChange={v => onChange(index, { ...item, thumbnail: v })}
               hint="권장 크기: 1280×720px (16:9), 용량 500KB 이하"
             />
             <ListField
-              label="갤러리 사진 (타입이 photo일 때만 사용됨, 모달에서 넘겨보는 사진들 — 대표 사진과 별개, 대표 사진도 보이게 하려면 여기에 한 번 더 추가)"
+              label="갤러리 사진 (필수, 모달에서 순서대로 넘겨봄 — 영상이 있으면 마지막에 이어서 표시)"
               items={item.photos ?? []}
               onChange={photos => onChange(index, { ...item, photos })}
               newItem=""
@@ -56,8 +55,13 @@ export default function CharactersForm({ data, onSave }) {
                 />
               )}
             />
-            <TextField label="YouTube 영상 ID (type이 youtube일 때)" value={item.youtubeId || ''} onChange={v => onChange(index, { ...item, youtubeId: v })} />
-            <TextField label="영상 파일 URL (type이 local일 때)" value={item.src} onChange={v => onChange(index, { ...item, src: v })} />
+            <TextField label="유튜브 영상 ID (선택, 갤러리 마지막에 추가됨)" value={item.youtubeId || ''} onChange={v => onChange(index, { ...item, youtubeId: v })} />
+            <TextField
+              label="시작 시간 (초, 선택 — 유튜브 영상 있을 때만)"
+              value={item.youtubeStart ?? ''}
+              onChange={v => onChange(index, { ...item, youtubeStart: v === '' ? undefined : Number(v) })}
+            />
+            <TextField label="로컬 영상 파일 URL (선택, 유튜브 없을 때만)" value={item.localVideoSrc || ''} onChange={v => onChange(index, { ...item, localVideoSrc: v })} />
           </>
         )}
       />
