@@ -55,7 +55,7 @@ export default function CharactersForm({ data, onSave }) {
                 />
               )}
             />
-            <TextField label="유튜브 영상 ID (선택, 갤러리 마지막에 추가됨)" value={item.youtubeId || ''} onChange={v => onChange(index, { ...item, youtubeId: v })} />
+            <TextField label="유튜브 영상 ID 또는 링크 (선택, 갤러리 마지막에 추가됨)" value={item.youtubeId || ''} onChange={v => onChange(index, { ...item, youtubeId: v })} />
             <TextField
               label="시작 시간 (초, 선택 — 유튜브 영상 있을 때만)"
               value={item.youtubeStart ?? ''}

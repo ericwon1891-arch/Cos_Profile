@@ -1,5 +1,22 @@
 import { useState } from 'react'
 
+function extractYoutubeId(value) {
+  if (!value) return value
+  const trimmed = value.trim()
+  if (!trimmed.includes('/') && !trimmed.includes('?')) return trimmed
+
+  try {
+    const url = new URL(/^https?:\/\//.test(trimmed) ? trimmed : `https://${trimmed}`)
+    if (url.hostname.includes('youtu.be')) return url.pathname.slice(1)
+    if (url.searchParams.has('v')) return url.searchParams.get('v')
+    const embedMatch = url.pathname.match(/\/embed\/([^/?]+)/)
+    if (embedMatch) return embedMatch[1]
+    return trimmed
+  } catch {
+    return trimmed
+  }
+}
+
 function buildSlides(work) {
   const galleryPhotos = work.photos?.filter(Boolean) ?? []
   const photos = galleryPhotos.length
@@ -8,7 +25,7 @@ function buildSlides(work) {
   const photoSlides = photos.map(url => ({ kind: 'image', url }))
 
   const videoSlide = work.youtubeId
-    ? { kind: 'youtube', id: work.youtubeId, start: work.youtubeStart }
+    ? { kind: 'youtube', id: extractYoutubeId(work.youtubeId), start: work.youtubeStart }
     : work.localVideoSrc
       ? { kind: 'local', src: work.localVideoSrc }
       : (work.type === 'local' && work.src)

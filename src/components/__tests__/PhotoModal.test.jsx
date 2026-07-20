@@ -154,4 +154,31 @@ describe('PhotoModal', () => {
     const video = screen.getByTestId('local-video')
     expect(video).toHaveAttribute('src', '/videos/mixed.mp4')
   })
+
+  it('youtubeId에 youtu.be 단축 링크가 들어있어도 영상 ID만 추출해 재생한다', () => {
+    const work = { ...legacyYoutubeWork, youtubeId: 'https://youtu.be/abc123?t=5' }
+    render(<PhotoModal work={work} onClose={() => {}} />)
+    const iframe = screen.getByTitle('video-player')
+    expect(iframe).toHaveAttribute('src', expect.stringContaining('youtube.com/embed/abc123'))
+  })
+
+  it('youtubeId에 watch?v= 링크가 들어있어도 영상 ID만 추출해 재생한다', () => {
+    const work = { ...legacyYoutubeWork, youtubeId: 'https://www.youtube.com/watch?v=abc123&t=90s' }
+    render(<PhotoModal work={work} onClose={() => {}} />)
+    const iframe = screen.getByTitle('video-player')
+    expect(iframe).toHaveAttribute('src', expect.stringContaining('youtube.com/embed/abc123'))
+  })
+
+  it('youtubeId에 embed 링크가 들어있어도 영상 ID만 추출해 재생한다', () => {
+    const work = { ...legacyYoutubeWork, youtubeId: 'https://www.youtube.com/embed/abc123' }
+    render(<PhotoModal work={work} onClose={() => {}} />)
+    const iframe = screen.getByTitle('video-player')
+    expect(iframe).toHaveAttribute('src', expect.stringContaining('youtube.com/embed/abc123'))
+  })
+
+  it('youtubeId가 순수 영상 ID면 그대로 재생한다', () => {
+    render(<PhotoModal work={legacyYoutubeWork} onClose={() => {}} />)
+    const iframe = screen.getByTitle('video-player')
+    expect(iframe).toHaveAttribute('src', expect.stringContaining('youtube.com/embed/abc123'))
+  })
 })
