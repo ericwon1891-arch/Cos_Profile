@@ -46,4 +46,30 @@ describe('WorkCard', () => {
     render(<WorkCard work={photoWork} onClick={() => {}} />)
     expect(screen.getByTestId('photo-icon')).toBeInTheDocument()
   })
+
+  it('사진+영상 혼합일 때도 재생 아이콘을 표시한다', () => {
+    const mixedWork = {
+      id: 3,
+      title: '혼합',
+      category: '카테고리 1',
+      photos: ['/photos/a.jpg'],
+      youtubeId: 'xyz',
+      thumbnail: '/thumbnails/mixed.jpg',
+    }
+    render(<WorkCard work={mixedWork} onClick={() => {}} />)
+    expect(screen.getByTestId('play-icon')).toBeInTheDocument()
+  })
+
+  it('레거시 로컬 영상 타입일 때도 재생 아이콘을 표시한다', () => {
+    const legacyLocalWork = {
+      id: 4,
+      title: '로컬 영상',
+      category: '카테고리 1',
+      type: 'local',
+      src: '/videos/test.mp4',
+      thumbnail: '/thumbnails/local.jpg',
+    }
+    render(<WorkCard work={legacyLocalWork} onClick={() => {}} />)
+    expect(screen.getByTestId('play-icon')).toBeInTheDocument()
+  })
 })

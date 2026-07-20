@@ -1,5 +1,6 @@
 export default function WorkCard({ work, onClick }) {
-  const isPhoto = work.type === 'photo'
+  const hasVideo = Boolean(work.youtubeId || work.localVideoSrc || (work.type === 'local' && work.src))
+  const isPhoto = !hasVideo
 
   return (
     <div
