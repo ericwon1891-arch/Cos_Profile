@@ -33,8 +33,8 @@ export default function ListField({ label, items, onChange, renderItem, addLabel
         {items.map((item, index) => (
           <div
             key={index}
-            className={`border border-gray-200 rounded p-3 relative ${reorderable ? 'pl-8' : ''}`}
-            draggable={reorderable}
+            className={`border border-gray-200 rounded p-3 relative${reorderable ? ' pl-8' : ''}`}
+            draggable={reorderable || undefined}
             onDragStart={reorderable ? () => setDragIndex(index) : undefined}
             onDragOver={reorderable ? e => e.preventDefault() : undefined}
             onDrop={reorderable ? () => handleDrop(index) : undefined}
