@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { useSectionContent } from './useSectionContent'
 import { supabase } from '../lib/supabaseClient'
 
@@ -54,5 +54,43 @@ describe('useSectionContent', () => {
 
     expect(result.current.error).toEqual(networkError)
     expect(result.current.data).toBeNull()
+  })
+
+  it('section이 바뀌면 새 데이터가 도착하기 전까지 이전 섹션의 data를 반환하지 않는다', async () => {
+    let resolveAbout
+    let resolveStrength
+
+    const makeSingle = (promise) => vi.fn().mockReturnValue(promise)
+    const eqAbout = vi.fn().mockReturnValue({ single: makeSingle(new Promise(r => { resolveAbout = r })) })
+    const eqStrength = vi.fn().mockReturnValue({ single: makeSingle(new Promise(r => { resolveStrength = r })) })
+    const select = vi.fn()
+      .mockReturnValueOnce({ eq: eqAbout })
+      .mockReturnValueOnce({ eq: eqStrength })
+    supabase.from.mockReturnValue({ select })
+
+    const { result, rerender } = renderHook(
+      ({ section }) => useSectionContent(section),
+      { initialProps: { section: 'about' } }
+    )
+
+    await act(async () => {
+      resolveAbout({ data: { data: { heading: 'ABOUT ME', body: '...' } }, error: null })
+    })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.data).toEqual({ heading: 'ABOUT ME', body: '...' })
+
+    rerender({ section: 'strength' })
+
+    // Before the 'strength' fetch resolves, the hook must not hand back
+    // 'about'-shaped data under the 'strength' key — that mismatch is what
+    // crashed AdminDashboard's ListField-based forms in production.
+    expect(result.current.loading).toBe(true)
+    expect(result.current.data).toBeNull()
+
+    await act(async () => {
+      resolveStrength({ data: { data: { heading: 'STRENGTH', items: [] } }, error: null })
+    })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.data).toEqual({ heading: 'STRENGTH', items: [] })
   })
 })
