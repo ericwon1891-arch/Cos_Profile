@@ -71,7 +71,7 @@ insert into site_content (section, data) values
     { "name": "YouTube", "stats": [ { "label": "구독자", "value": "1.9천명" } ], "url": "https://www.youtube.com/@nanary000" },
     { "name": "Instagram", "stats": [ { "label": "팔로워", "value": "6,297명" } ], "url": "https://www.instagram.com/cos_nanary/" },
     { "name": "X", "stats": [ { "label": "팔로워", "value": "17.9K" } ], "url": "https://x.com/nanary000" },
-    { "name": "Chzzk", "stats": [ { "label": "활동", "value": "라이브 방송" } ], "url": "https://chzzk.naver.com/REPLACE_ME" }
+    { "name": "Chzzk", "stats": [ { "label": "활동", "value": "라이브 방송" } ], "url": "https://chzzk.naver.com/0af0472d401993d11c25adc611856536" }
   ]
 }$json$::jsonb),
 
@@ -88,10 +88,10 @@ insert into site_content (section, data) values
 ('contact', $json${
   "qrImage": "/placeholder-qr.png",
   "links": [
-    { "label": "유튜브", "href": "https://youtube.com/@REPLACE_ME" },
-    { "label": "인스타그램", "href": "https://instagram.com/REPLACE_ME" },
-    { "label": "X", "href": "https://x.com/REPLACE_ME" },
-    { "label": "이메일", "href": "mailto:REPLACE_ME@email.com" }
+    { "label": "유튜브", "href": "https://www.youtube.com/@nanary000" },
+    { "label": "인스타그램", "href": "https://www.instagram.com/cos_nanary/" },
+    { "label": "X", "href": "https://x.com/nanary000" },
+    { "label": "이메일", "href": "mailto:nanary000@naver.com" }
   ]
 }$json$::jsonb)
 
