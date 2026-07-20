@@ -37,8 +37,10 @@ export default function CharactersForm({ data, onSave }) {
             <ImageField
               label="사진"
               value={item.thumbnail}
-              onChange={v => onChange(index, { ...item, thumbnail: v, src: v })}
+              onChange={v => onChange(index, { ...item, thumbnail: v, src: item.type === 'photo' ? v : item.src })}
             />
+            <TextField label="YouTube 영상 ID (type이 youtube일 때)" value={item.youtubeId || ''} onChange={v => onChange(index, { ...item, youtubeId: v })} />
+            <TextField label="영상 파일 URL (type이 local일 때)" value={item.src} onChange={v => onChange(index, { ...item, src: v })} />
           </>
         )}
       />

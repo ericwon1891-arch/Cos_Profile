@@ -69,6 +69,9 @@ export default function AdminDashboard() {
           {!loading && data && active && (
             <active.Form data={data} onSave={handleSave} />
           )}
+          {!loading && !data && (
+            <p className="text-gray-500 text-sm">이 섹션의 데이터가 없습니다. supabase/seed.sql을 실행했는지 확인해 주세요.</p>
+          )}
         </main>
       </div>
     </div>
