@@ -44,7 +44,7 @@ export default function CharactersSection() {
         </div>
       </div>
       {selectedWork && selectedWork.type === 'photo' && (
-        <PhotoModal work={selectedWork} onClose={() => setSelectedWork(null)} />
+        <PhotoModal key={selectedWork.id} work={selectedWork} onClose={() => setSelectedWork(null)} />
       )}
       {selectedWork && selectedWork.type !== 'photo' && (
         <VideoModal work={selectedWork} onClose={() => setSelectedWork(null)} />
