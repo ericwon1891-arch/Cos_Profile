@@ -8,7 +8,8 @@ set data = $json${
     { "id": 3, "title": "브라운더스트2", "category": "게임", "type": "photo", "src": "/placeholder-character.jpg", "thumbnail": "/placeholder-character.jpg" },
     { "id": 4, "title": "블루아카이브", "category": "게임", "type": "photo", "src": "/placeholder-character.jpg", "thumbnail": "/placeholder-character.jpg" },
     { "id": 5, "title": "원신", "category": "게임", "type": "photo", "src": "/placeholder-character.jpg", "thumbnail": "/placeholder-character.jpg" },
-    { "id": 6, "title": "젠레스존제로", "category": "게임", "type": "photo", "src": "/placeholder-character.jpg", "thumbnail": "/placeholder-character.jpg" }
+    { "id": 6, "title": "젠레스존제로", "category": "게임", "type": "photo", "src": "/placeholder-character.jpg", "thumbnail": "/placeholder-character.jpg" },
+    { "id": 7, "title": "그로자 (소녀전선)", "category": "게임", "type": "photo", "src": "/placeholder-character.jpg", "thumbnail": "/placeholder-character.jpg" }
   ]
 }$json$::jsonb,
     updated_at = now()
