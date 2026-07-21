@@ -101,70 +101,86 @@ insert into site_content (section, data) values
 }$json$::jsonb),
 
 ('characters', $json${
-  "items": [
+  "sections": [
     {
-      "id": 1,
-      "src": "/placeholder-character.jpg",
-      "type": "photo",
-      "title": "라크스 클라인",
-      "category": "애니메이션",
-      "thumbnail": "/placeholder-character.jpg"
+      "id": "photo",
+      "heading": "대표 캐릭터 - 사진",
+      "categories": [
+        "전체",
+        "게임",
+        "애니메이션",
+        "오리지널"
+      ],
+      "items": [
+        {
+          "id": 1,
+          "src": "/placeholder-character.jpg",
+          "type": "photo",
+          "title": "라크스 클라인",
+          "category": "애니메이션",
+          "thumbnail": "/placeholder-character.jpg"
+        },
+        {
+          "id": 2,
+          "src": "/placeholder-character.jpg",
+          "type": "photo",
+          "title": "니케",
+          "category": "게임",
+          "thumbnail": "/placeholder-character.jpg"
+        },
+        {
+          "id": 3,
+          "src": "/placeholder-character.jpg",
+          "type": "photo",
+          "title": "브라운더스트2",
+          "category": "게임",
+          "thumbnail": "/placeholder-character.jpg"
+        },
+        {
+          "id": 4,
+          "src": "/placeholder-character.jpg",
+          "type": "photo",
+          "title": "블루아카이브",
+          "category": "게임",
+          "thumbnail": "/placeholder-character.jpg"
+        },
+        {
+          "id": 5,
+          "src": "/placeholder-character.jpg",
+          "type": "photo",
+          "title": "원신",
+          "category": "게임",
+          "thumbnail": "/placeholder-character.jpg"
+        },
+        {
+          "id": 6,
+          "src": "/placeholder-character.jpg",
+          "type": "photo",
+          "title": "젠레스존제로",
+          "category": "게임",
+          "thumbnail": "/placeholder-character.jpg"
+        },
+        {
+          "id": 7,
+          "src": "https://mjrfuktpqqqtvtbadxlj.supabase.co/storage/v1/object/public/media/1784520920724-UMI07484.jpg",
+          "type": "photo",
+          "title": "그로자 (소녀전선)",
+          "category": "게임",
+          "thumbnail": "https://mjrfuktpqqqtvtbadxlj.supabase.co/storage/v1/object/public/media/1784520920724-UMI07484.jpg"
+        }
+      ]
     },
     {
-      "id": 2,
-      "src": "/placeholder-character.jpg",
-      "type": "photo",
-      "title": "니케",
-      "category": "게임",
-      "thumbnail": "/placeholder-character.jpg"
-    },
-    {
-      "id": 3,
-      "src": "/placeholder-character.jpg",
-      "type": "photo",
-      "title": "브라운더스트2",
-      "category": "게임",
-      "thumbnail": "/placeholder-character.jpg"
-    },
-    {
-      "id": 4,
-      "src": "/placeholder-character.jpg",
-      "type": "photo",
-      "title": "블루아카이브",
-      "category": "게임",
-      "thumbnail": "/placeholder-character.jpg"
-    },
-    {
-      "id": 5,
-      "src": "/placeholder-character.jpg",
-      "type": "photo",
-      "title": "원신",
-      "category": "게임",
-      "thumbnail": "/placeholder-character.jpg"
-    },
-    {
-      "id": 6,
-      "src": "/placeholder-character.jpg",
-      "type": "photo",
-      "title": "젠레스존제로",
-      "category": "게임",
-      "thumbnail": "/placeholder-character.jpg"
-    },
-    {
-      "id": 7,
-      "src": "https://mjrfuktpqqqtvtbadxlj.supabase.co/storage/v1/object/public/media/1784520920724-UMI07484.jpg",
-      "type": "photo",
-      "title": "그로자 (소녀전선)",
-      "category": "게임",
-      "thumbnail": "https://mjrfuktpqqqtvtbadxlj.supabase.co/storage/v1/object/public/media/1784520920724-UMI07484.jpg"
+      "id": "video",
+      "heading": "대표 캐릭터 - 영상",
+      "categories": [
+        "전체",
+        "게임",
+        "애니메이션",
+        "오리지널"
+      ],
+      "items": []
     }
-  ],
-  "heading": "대표 캐릭터",
-  "categories": [
-    "전체",
-    "게임",
-    "애니메이션",
-    "오리지널"
   ]
 }$json$::jsonb),
 

@@ -3,6 +3,8 @@
 -- { sections: [ {id, heading, categories, items}, ... ] } 구조로 변환한다.
 -- 영상 필드(youtubeId/localVideoSrc/레거시 type=local+src)가 있는 캐릭터는 '영상' 섹션으로,
 -- 없는 캐릭터는 '사진' 섹션으로 자동 분류한다.
+-- 이 마이그레이션은 멱등성이 보장됨: WHERE 절의 가드(items 키 존재 + sections 키 미존재)로 인해
+-- 실수로 여러 번 실행되어도 두 번째 이후는 조건을 만족하는 행이 없어 아무것도 변경되지 않음.
 -- 실행 전 아래 select로 현재 값을 확인/백업해두는 것을 권장.
 
 -- 실행 전 확인용:
@@ -42,7 +44,9 @@ set data = jsonb_build_object(
   )
 ),
 updated_at = now()
-where section = 'characters';
+where section = 'characters'
+  and data ? 'items'
+  and not (data ? 'sections');
 
 -- 실행 후 확인용:
 -- select data from site_content where section = 'characters';
