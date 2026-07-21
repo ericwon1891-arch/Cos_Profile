@@ -2,14 +2,24 @@ import { useState } from 'react'
 import WorkCard from './WorkCard'
 import PhotoModal from './PhotoModal'
 
+const VISIBLE_COUNT = 6
+
 export default function CharacterSectionBlock({ section }) {
   const [activeFilter, setActiveFilter] = useState('전체')
   const [selectedWork, setSelectedWork] = useState(null)
+  const [expanded, setExpanded] = useState(false)
 
   const { id, heading, categories, items } = section
   const filtered = activeFilter === '전체'
     ? items
     : items.filter(item => item.category === activeFilter)
+
+  const visible = expanded ? filtered : filtered.slice(0, VISIBLE_COUNT)
+
+  function handleFilterClick(category) {
+    setActiveFilter(category)
+    setExpanded(false)
+  }
 
   return (
     <section id={`characters-${id}`} className="py-20 bg-[#f9f9f7]">
@@ -19,7 +29,7 @@ export default function CharacterSectionBlock({ section }) {
           {categories.map(category => (
             <button
               key={category}
-              onClick={() => setActiveFilter(category)}
+              onClick={() => handleFilterClick(category)}
               className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
                 activeFilter === category
                   ? 'bg-gray-900 text-white'
@@ -31,10 +41,20 @@ export default function CharacterSectionBlock({ section }) {
           ))}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map(item => (
+          {visible.map(item => (
             <WorkCard key={item.id} work={item} onClick={setSelectedWork} />
           ))}
         </div>
+        {filtered.length > VISIBLE_COUNT && !expanded && (
+          <div className="text-center mt-8">
+            <button
+              onClick={() => setExpanded(true)}
+              className="px-6 py-2 rounded border border-gray-300 text-sm font-medium text-gray-700 hover:border-gray-500"
+            >
+              더보기
+            </button>
+          </div>
+        )}
       </div>
       {selectedWork && (
         <PhotoModal key={selectedWork.id} work={selectedWork} onClose={() => setSelectedWork(null)} />
