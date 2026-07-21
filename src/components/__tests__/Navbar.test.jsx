@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import Navbar from '../Navbar'
 import { useSectionContent } from '../../hooks/useSectionContent'
 
@@ -35,5 +35,30 @@ describe('Navbar', () => {
     expect(screen.getByText('소개')).toBeInTheDocument()
     expect(screen.getByText('경력')).toBeInTheDocument()
     expect(screen.getByText('Contact')).toBeInTheDocument()
+  })
+
+  it('햄버거 버튼이 렌더링된다', () => {
+    useSectionContent.mockReturnValue({ data: null, loading: true, error: null })
+    render(<Navbar />)
+    expect(screen.getByRole('button', { name: '메뉴 열기' })).toBeInTheDocument()
+  })
+
+  it('햄버거 버튼 클릭 시 모바일 메뉴 패널이 열리고 네비 항목들이 보인다', () => {
+    useSectionContent.mockReturnValue({ data: null, loading: true, error: null })
+    render(<Navbar />)
+    expect(screen.queryByTestId('mobile-nav-panel')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 열기' }))
+    const panel = screen.getByTestId('mobile-nav-panel')
+    expect(within(panel).getByText('소개')).toBeInTheDocument()
+    expect(within(panel).getByText('Contact')).toBeInTheDocument()
+  })
+
+  it('메뉴가 열린 상태에서 네비 항목을 클릭하면 메뉴가 닫힌다', () => {
+    useSectionContent.mockReturnValue({ data: null, loading: true, error: null })
+    render(<Navbar />)
+    fireEvent.click(screen.getByRole('button', { name: '메뉴 열기' }))
+    const panel = screen.getByTestId('mobile-nav-panel')
+    fireEvent.click(within(panel).getByText('소개'))
+    expect(screen.queryByTestId('mobile-nav-panel')).not.toBeInTheDocument()
   })
 })
