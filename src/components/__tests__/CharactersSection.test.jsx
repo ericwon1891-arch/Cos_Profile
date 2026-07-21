@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import CharactersSection from '../CharactersSection'
 import { useSectionContent } from '../../hooks/useSectionContent'
 
@@ -6,54 +6,44 @@ vi.mock('../../hooks/useSectionContent', () => ({
   useSectionContent: vi.fn(),
 }))
 
-const mockData = {
-  heading: '대표 캐릭터',
-  categories: ['전체', '카테고리 1', '카테고리 2'],
-  items: [
-    { id: 1, title: '캐릭터 1', category: '카테고리 1', type: 'photo', src: '/p1.jpg', thumbnail: '/p1.jpg' },
-    { id: 2, title: '캐릭터 2', category: '카테고리 1', type: 'photo', src: '/p2.jpg', thumbnail: '/p2.jpg' },
-    { id: 3, title: '캐릭터 3', category: '카테고리 2', type: 'youtube', youtubeId: 'abc', thumbnail: '/p3.jpg' },
-  ],
-}
+vi.mock('../CharacterSectionBlock', () => ({
+  default: ({ section }) => <div data-testid="section-block">{section.heading}</div>,
+}))
 
 describe('CharactersSection', () => {
-  beforeEach(() => {
-    useSectionContent.mockReturnValue({ data: mockData, loading: false, error: null })
-  })
-
-  it('기본은 전체 캐릭터를 표시한다', () => {
+  it('섹션 배열 순서대로 CharacterSectionBlock을 렌더링한다', () => {
+    useSectionContent.mockReturnValue({
+      data: {
+        sections: [
+          { id: 'photo', heading: '대표 캐릭터 - 사진', categories: [], items: [] },
+          { id: 'video', heading: '대표 캐릭터 - 영상', categories: [], items: [] },
+        ],
+      },
+      loading: false,
+      error: null,
+    })
     render(<CharactersSection />)
-    expect(screen.getAllByTestId('work-card')).toHaveLength(3)
+    const blocks = screen.getAllByTestId('section-block')
+    expect(blocks).toHaveLength(2)
+    expect(blocks[0]).toHaveTextContent('대표 캐릭터 - 사진')
+    expect(blocks[1]).toHaveTextContent('대표 캐릭터 - 영상')
   })
 
-  it('카테고리 1 필터 클릭 시 해당 카테고리만 표시한다', () => {
+  it('섹션이 빈 배열이면 아무것도 렌더링하지 않는다', () => {
+    useSectionContent.mockReturnValue({ data: { sections: [] }, loading: false, error: null })
     render(<CharactersSection />)
-    fireEvent.click(screen.getByRole('button', { name: '카테고리 1' }))
-    expect(screen.getAllByTestId('work-card')).toHaveLength(2)
+    expect(screen.queryAllByTestId('section-block')).toHaveLength(0)
   })
 
-  it('전체 필터 클릭 시 모든 캐릭터를 표시한다', () => {
-    render(<CharactersSection />)
-    fireEvent.click(screen.getByRole('button', { name: '카테고리 1' }))
-    fireEvent.click(screen.getByRole('button', { name: '전체' }))
-    expect(screen.getAllByTestId('work-card')).toHaveLength(3)
-  })
-
-  it('photo 타입 카드 클릭 시 PhotoModal이 열린다', () => {
-    render(<CharactersSection />)
-    fireEvent.click(screen.getAllByTestId('work-card')[0])
-    expect(screen.getAllByAltText('캐릭터 1')).toHaveLength(2)
-  })
-
-  it('youtube 타입 카드 클릭 시 모달에 영상 슬라이드가 열린다', () => {
-    render(<CharactersSection />)
-    fireEvent.click(screen.getAllByTestId('work-card')[2])
-    expect(screen.getByTitle('video-player')).toBeInTheDocument()
-  })
-
-  it('로딩 중일 때는 카드가 렌더링되지 않는다', () => {
+  it('로딩 중이면 아무것도 렌더링하지 않는다', () => {
     useSectionContent.mockReturnValue({ data: null, loading: true, error: null })
     render(<CharactersSection />)
-    expect(screen.queryAllByTestId('work-card')).toHaveLength(0)
+    expect(screen.queryAllByTestId('section-block')).toHaveLength(0)
+  })
+
+  it('data가 null이면 아무것도 렌더링하지 않는다', () => {
+    useSectionContent.mockReturnValue({ data: null, loading: false, error: null })
+    render(<CharactersSection />)
+    expect(screen.queryAllByTestId('section-block')).toHaveLength(0)
   })
 })
