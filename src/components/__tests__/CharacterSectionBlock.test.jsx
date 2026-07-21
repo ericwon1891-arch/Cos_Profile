@@ -93,4 +93,11 @@ describe('CharacterSectionBlock', () => {
     expect(screen.getAllByTestId('work-card')).toHaveLength(6)
     expect(screen.getByRole('button', { name: '더보기' })).toBeInTheDocument()
   })
+
+  it('showMoreEnabled가 false면 6개를 넘어도 전부 표시되고 더보기 버튼이 없다', () => {
+    const disabledSection = { ...manyItemsSection, showMoreEnabled: false }
+    render(<CharacterSectionBlock section={disabledSection} />)
+    expect(screen.getAllByTestId('work-card')).toHaveLength(8)
+    expect(screen.queryByRole('button', { name: '더보기' })).not.toBeInTheDocument()
+  })
 })

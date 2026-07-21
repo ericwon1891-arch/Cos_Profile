@@ -9,12 +9,13 @@ export default function CharacterSectionBlock({ section }) {
   const [selectedWork, setSelectedWork] = useState(null)
   const [expanded, setExpanded] = useState(false)
 
-  const { id, heading, categories, items } = section
+  const { id, heading, categories, items, showMoreEnabled } = section
+  const limitEnabled = showMoreEnabled !== false
   const filtered = activeFilter === '전체'
     ? items
     : items.filter(item => item.category === activeFilter)
 
-  const visible = expanded ? filtered : filtered.slice(0, VISIBLE_COUNT)
+  const visible = (limitEnabled && !expanded) ? filtered.slice(0, VISIBLE_COUNT) : filtered
 
   function handleFilterClick(category) {
     setActiveFilter(category)
@@ -45,7 +46,7 @@ export default function CharacterSectionBlock({ section }) {
             <WorkCard key={item.id} work={item} onClick={setSelectedWork} />
           ))}
         </div>
-        {filtered.length > VISIBLE_COUNT && !expanded && (
+        {limitEnabled && filtered.length > VISIBLE_COUNT && !expanded && (
           <div className="text-center mt-8">
             <button
               onClick={() => setExpanded(true)}

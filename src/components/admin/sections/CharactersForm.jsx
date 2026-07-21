@@ -16,16 +16,28 @@ export default function CharactersForm({ data, onSave }) {
         label="캐릭터 섹션"
         items={form.sections}
         onChange={sections => update('sections', sections)}
-        newItem={{ id: Date.now(), heading: '', categories: ['전체'], items: [] }}
+        newItem={{ id: Date.now(), heading: '', categories: ['전체'], items: [], showMoreEnabled: true }}
         addLabel="섹션 추가"
         reorderable
         renderItem={({ item: section, index, onChange }) => (
           <>
-            <TextField
-              label="섹션 제목"
-              value={section.heading}
-              onChange={v => onChange(index, { ...section, heading: v })}
-            />
+            <div className="flex items-end gap-4">
+              <div className="flex-1">
+                <TextField
+                  label="섹션 제목"
+                  value={section.heading}
+                  onChange={v => onChange(index, { ...section, heading: v })}
+                />
+              </div>
+              <label className="flex items-center gap-2 text-sm text-gray-700 whitespace-nowrap mb-4">
+                <input
+                  type="checkbox"
+                  checked={section.showMoreEnabled !== false}
+                  onChange={e => onChange(index, { ...section, showMoreEnabled: e.target.checked })}
+                />
+                카드 6개로 제한
+              </label>
+            </div>
             <ListField
               label="카테고리 (첫 번째는 '전체' 권장)"
               items={section.categories}
