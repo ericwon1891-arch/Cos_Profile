@@ -21,7 +21,7 @@ set data = jsonb_build_object(
         where not (
           coalesce(item->>'youtubeId', '') <> ''
           or coalesce(item->>'localVideoSrc', '') <> ''
-          or (item->>'type' = 'local' and coalesce(item->>'src', '') <> '')
+          or (coalesce(item->>'type', '') = 'local' and coalesce(item->>'src', '') <> '')
         )
       ), '[]'::jsonb)
     ),
@@ -35,7 +35,7 @@ set data = jsonb_build_object(
         where (
           coalesce(item->>'youtubeId', '') <> ''
           or coalesce(item->>'localVideoSrc', '') <> ''
-          or (item->>'type' = 'local' and coalesce(item->>'src', '') <> '')
+          or (coalesce(item->>'type', '') = 'local' and coalesce(item->>'src', '') <> '')
         )
       ), '[]'::jsonb)
     )
