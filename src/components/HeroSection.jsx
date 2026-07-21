@@ -17,7 +17,7 @@ export default function HeroSection() {
       <img
         src={photo}
         alt={name}
-        className="absolute inset-0 w-full h-full object-cover object-top md:object-center opacity-40"
+        className="absolute inset-0 w-full h-full object-cover object-top md:object-center opacity-40 [@media(min-aspect-ratio:3/2)]:object-contain [@media(max-aspect-ratio:3/4)]:object-contain"
         onError={e => { e.target.style.display = 'none' }}
       />
       <div className="relative flex flex-col items-center gap-4 max-w-2xl">
