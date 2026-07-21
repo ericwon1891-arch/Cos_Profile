@@ -1,21 +1,31 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-scroll'
+import { useSectionContent } from '../hooks/useSectionContent'
 
-const NAV_LINKS = [
+const LINKS_BEFORE_CHARACTERS = [
   { label: '소개', to: 'about' },
   { label: '경력', to: 'career' },
-  { label: '대표 캐릭터', to: 'characters' },
+]
+
+const LINKS_AFTER_CHARACTERS = [
   { label: 'Contact', to: 'contact' },
 ]
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const { data, loading } = useSectionContent('characters')
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50)
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  const characterLinks = (!loading && data?.sections)
+    ? data.sections.map(section => ({ label: section.heading, to: `characters-${section.id}` }))
+    : []
+
+  const navLinks = [...LINKS_BEFORE_CHARACTERS, ...characterLinks, ...LINKS_AFTER_CHARACTERS]
 
   return (
     <nav className={`fixed top-0 w-full z-40 transition-all duration-300 ${
@@ -31,7 +41,7 @@ export default function Navbar() {
           NANARY
         </Link>
         <div className="flex gap-6">
-          {NAV_LINKS.map(({ label, to }) => (
+          {navLinks.map(({ label, to }) => (
             <Link
               key={to}
               to={to}
