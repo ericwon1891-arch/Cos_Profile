@@ -73,6 +73,13 @@
 - 관리자 사이드바에 "계정 설정" 메뉴 연결
 - 버그 수정: 계정 설정 탭에서 불필요한 `site_content` 조회를 건너뛰도록 수정
 
+## 2026-07-22 — site_content 변경 이력 및 롤백
+
+- `site_content_history` 테이블 + `AFTER UPDATE` 트리거 추가 (섹션별 최근 5개 변경 이력 자동 보관)
+- 트리거 함수는 `security definer`로 실행, `site_content_history`는 `authenticated` 롤에 `select`만 허용 — 관리자 세션이 탈취돼도 이력 자체는 API로 조작 불가
+- 복원은 관리자 UI 없이 Supabase SQL Editor에서 수동 수행 (절차: `docs/superpowers/specs/2026-07-22-content-history-rollback-design.md` 참고)
+- 프로덕션 Supabase에 마이그레이션 적용 및 검증 완료: 6회 연속 업데이트 시 이력 5개로 유지, 동일 값 재저장 시 이력 미증가, `authenticated` 롤의 직접 insert/delete 전부 거부, 복원 SQL로 실제 섹션 복원 확인
+
 ## 배포
 
 - 배포처: Vercel — org `nanary000`, project `cos-profile`, production URL `https://cos-profile.vercel.app`
