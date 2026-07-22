@@ -47,4 +47,12 @@ describe('AdminDashboard', () => {
     const toast = await screen.findByRole('status')
     expect(toast).toHaveTextContent('저장 실패: 권한 없음')
   })
+
+  it('계정 설정 메뉴를 클릭하면 비밀번호 변경 폼을 보여준다', () => {
+    render(<AdminDashboard />)
+    fireEvent.click(screen.getByRole('button', { name: '계정 설정' }))
+
+    expect(screen.getByLabelText('현재 비밀번호')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '저장' })).not.toBeInTheDocument()
+  })
 })

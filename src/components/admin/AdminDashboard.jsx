@@ -12,6 +12,7 @@ import SnsForm from './sections/SnsForm'
 import ServicesForm from './sections/ServicesForm'
 import PersonalityForm from './sections/PersonalityForm'
 import ContactForm from './sections/ContactForm'
+import AccountForm from './sections/AccountForm'
 
 const SECTIONS = [
   { key: 'hero', label: 'Hero', Form: HeroForm },
@@ -24,6 +25,7 @@ const SECTIONS = [
   { key: 'services', label: 'Additional Services', Form: ServicesForm },
   { key: 'personality', label: 'Personality', Form: PersonalityForm },
   { key: 'contact', label: 'Contact', Form: ContactForm },
+  { key: 'account', label: '계정 설정' },
 ]
 
 export default function AdminDashboard() {
@@ -80,10 +82,11 @@ export default function AdminDashboard() {
           ))}
         </nav>
         <main className="flex-1 p-8 max-w-2xl">
-          {!loading && data && active && (
+          {activeKey === 'account' && <AccountForm />}
+          {activeKey !== 'account' && !loading && data && active && (
             <active.Form data={data} onSave={handleSave} />
           )}
-          {!loading && !data && (
+          {activeKey !== 'account' && !loading && !data && (
             <p className="text-gray-500 text-sm">이 섹션의 데이터가 없습니다. supabase/seed.sql을 실행했는지 확인해 주세요.</p>
           )}
         </main>
