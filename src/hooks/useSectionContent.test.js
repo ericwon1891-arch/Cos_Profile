@@ -93,4 +93,15 @@ describe('useSectionContent', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.data).toEqual({ heading: 'STRENGTH', items: [] })
   })
+
+  it('section이 없으면(falsy) fetch를 하지 않고 즉시 loading false, data null을 반환한다', () => {
+    const callsBefore = supabase.from.mock.calls.length
+
+    const { result } = renderHook(() => useSectionContent(null))
+
+    expect(result.current.loading).toBe(false)
+    expect(result.current.data).toBeNull()
+    expect(result.current.error).toBeNull()
+    expect(supabase.from.mock.calls.length).toBe(callsBefore)
+  })
 })

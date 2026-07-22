@@ -31,7 +31,7 @@ const SECTIONS = [
 export default function AdminDashboard() {
   const { signOut } = useAuth()
   const [activeKey, setActiveKey] = useState(SECTIONS[0].key)
-  const { data, loading } = useSectionContent(activeKey)
+  const { data, loading } = useSectionContent(activeKey === 'account' ? null : activeKey)
   const [status, setStatus] = useState(null)
 
   async function handleSave(newData) {

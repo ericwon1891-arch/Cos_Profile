@@ -5,6 +5,11 @@ export function useSectionContent(section) {
   const [state, setState] = useState({ section: null, data: null, loading: true, error: null })
 
   useEffect(() => {
+    if (!section) {
+      setState({ section, data: null, loading: false, error: null })
+      return
+    }
+
     let cancelled = false
 
     supabase

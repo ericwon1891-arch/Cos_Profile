@@ -54,5 +54,6 @@ describe('AdminDashboard', () => {
 
     expect(screen.getByLabelText('현재 비밀번호')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '저장' })).not.toBeInTheDocument()
+    expect(useSectionContent).toHaveBeenCalledWith(null)
   })
 })
