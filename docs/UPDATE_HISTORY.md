@@ -80,6 +80,15 @@
 - 복원은 관리자 UI 없이 Supabase SQL Editor에서 수동 수행 (절차: `docs/superpowers/specs/2026-07-22-content-history-rollback-design.md` 참고)
 - 프로덕션 Supabase에 마이그레이션 적용 및 검증 완료: 6회 연속 업데이트 시 이력 5개로 유지, 동일 값 재저장 시 이력 미증가, `authenticated` 롤의 직접 insert/delete 전부 거부, 복원 SQL로 실제 섹션 복원 확인
 
+## 2026-07-22 — Security Advisor 경고 대응
+
+Supabase Security Advisor에서 발견된 경고 6건을 검토, 기능에 영향 없는 3건을 프로덕션에 바로 적용.
+
+- `storage.media`의 공개 SELECT 정책(`media public read`) 제거 — public 버킷은 이 정책 없이도 `getPublicUrl()`로 개별 파일 접근 가능하며, 앱이 `list()`를 쓰지 않아 목록 조회 권한이 불필요했음
+- `fn_archive_site_content_history()`의 `EXECUTE` 권한을 `public`/`anon`/`authenticated`에서 회수 — 트리거 전용 함수라 EXECUTE 권한 없이도 트리거 동작에는 영향 없음, 로그인 없이 RPC로 직접 호출 가능했던 경로 차단
+- 경고 6→3건으로 감소. 남은 3건은 대응 안 함: `site_content`의 insert/update RLS 정책이 `USING(true)`인 것은 관리자 1인이 전 섹션을 편집하는 CMS 구조상 의도된 설계, 유출 비밀번호 보호(Leaked Password Protection)는 Supabase Pro 플랜부터 지원돼 Free 플랜에서는 활성화 불가
+- 적용: `supabase/update-security-hardening.sql`
+
 ## 배포
 
 - 배포처: Vercel — org `nanary000`, project `cos-profile`, production URL `https://cos-profile.vercel.app`
