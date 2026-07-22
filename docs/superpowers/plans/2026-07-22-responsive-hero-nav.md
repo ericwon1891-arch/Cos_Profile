@@ -32,7 +32,7 @@
 - Consumes: 기존과 동일한 `useSectionContent('hero')` 반환값 (`{ photo, label, name, subtitle, quote, facts }`) — 형태 변경 없음
 - Produces: 없음 (leaf 컴포넌트)
 
-- [ ] **Step 1: 테스트 파일 작성 (실패 상태)**
+- [x] **Step 1: 테스트 파일 작성 (실패 상태)**
 
 `src/components/__tests__/HeroSection.test.jsx` 신규 작성:
 
@@ -74,12 +74,12 @@ describe('HeroSection', () => {
 })
 ```
 
-- [ ] **Step 2: 테스트 실행해서 실패하는지 확인**
+- [x] **Step 2: 테스트 실행해서 실패하는지 확인**
 
 Run: `npm test -- --run src/components/__tests__/HeroSection.test.jsx`
 Expected: 첫 번째 테스트는 FAIL — 지금 `img`의 className에 `[@media(min-aspect-ratio:3/2)]:object-contain`/`[@media(max-aspect-ratio:3/4)]:object-contain`이 없어서 `toContain` 실패. 두 번째 테스트(로딩 중)는 이미 PASS할 수 있음
 
-- [ ] **Step 3: `HeroSection.jsx`의 이미지 className 수정**
+- [x] **Step 3: `HeroSection.jsx`의 이미지 className 수정**
 
 `src/components/HeroSection.jsx`에서 아래 줄을 찾는다:
 
@@ -103,12 +103,12 @@ Expected: 첫 번째 테스트는 FAIL — 지금 `img`의 className에 `[@media
       />
 ```
 
-- [ ] **Step 4: 테스트 실행해서 전부 통과하는지 확인**
+- [x] **Step 4: 테스트 실행해서 전부 통과하는지 확인**
 
 Run: `npm test -- --run src/components/__tests__/HeroSection.test.jsx`
 Expected: 2개 테스트 전부 PASS
 
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ```bash
 git add src/components/HeroSection.jsx src/components/__tests__/HeroSection.test.jsx
@@ -127,7 +127,7 @@ git commit -m "feat: Hero 이미지가 극단적 화면비율에서 레터박스
 - Consumes: 기존과 동일한 `useSectionContent('characters')` 반환값 — 형태 변경 없음
 - Produces: 없음 (leaf 컴포넌트). 데스크톱 메뉴는 `data-testid="desktop-nav"`, 모바일 드롭다운 패널은 `data-testid="mobile-nav-panel"`을 갖는다 (테스트에서 두 메뉴를 구분하기 위함)
 
-- [ ] **Step 1: 테스트 파일에 햄버거 메뉴 관련 케이스 추가 (실패 상태로 만듦)**
+- [x] **Step 1: 테스트 파일에 햄버거 메뉴 관련 케이스 추가 (실패 상태로 만듦)**
 
 `src/components/__tests__/Navbar.test.jsx` 최상단 import를 다음으로 교체:
 
@@ -166,12 +166,12 @@ import { useSectionContent } from '../../hooks/useSectionContent'
   })
 ```
 
-- [ ] **Step 2: 테스트 실행해서 실패하는지 확인**
+- [x] **Step 2: 테스트 실행해서 실패하는지 확인**
 
 Run: `npm test -- --run src/components/__tests__/Navbar.test.jsx`
 Expected: 기존 3개는 PASS, 신규 3개는 FAIL — `getByRole('button', { name: '메뉴 열기' })`를 찾지 못하거나 `getByTestId('mobile-nav-panel')`이 존재하지 않아서 실패
 
-- [ ] **Step 3: `Navbar.jsx`에 햄버거 메뉴 구현**
+- [x] **Step 3: `Navbar.jsx`에 햄버거 메뉴 구현**
 
 `src/components/Navbar.jsx` 전체를 다음으로 교체:
 
@@ -273,17 +273,17 @@ export default function Navbar() {
 }
 ```
 
-- [ ] **Step 4: 테스트 실행해서 전부 통과하는지 확인**
+- [x] **Step 4: 테스트 실행해서 전부 통과하는지 확인**
 
 Run: `npm test -- --run src/components/__tests__/Navbar.test.jsx`
 Expected: 6개 테스트 전부 PASS
 
-- [ ] **Step 5: 전체 테스트 스위트 실행 (다른 곳에 영향 없는지 확인)**
+- [x] **Step 5: 전체 테스트 스위트 실행 (다른 곳에 영향 없는지 확인)**
 
 Run: `npm test -- --run`
 Expected: 모든 테스트 파일 PASS
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add src/components/Navbar.jsx src/components/__tests__/Navbar.test.jsx
@@ -296,17 +296,17 @@ git commit -m "feat: 모바일 세로모드에서 Navbar가 햄버거 메뉴로 
 
 **Files:** 없음 (코드 변경 없음, 검증만)
 
-- [ ] **Step 1: 전체 테스트 스위트 최종 실행**
+- [x] **Step 1: 전체 테스트 스위트 최종 실행**
 
 Run: `npm test -- --run`
 Expected: 모든 테스트 파일 PASS, 실패 0건
 
-- [ ] **Step 2: 프로덕션 빌드**
+- [x] **Step 2: 프로덕션 빌드**
 
 Run: `npm run build`
 Expected: 에러 없이 빌드 성공
 
-- [ ] **Step 3: 수동 브라우저 검증 (여러 화면 크기)**
+- [x] **Step 3: 수동 브라우저 검증 (여러 화면 크기)**
 
 `npm run dev`로 로컬 서버를 띄우고 브라우저 개발자 도구의 반응형 모드(디바이스 툴바)로 다음을 확인:
 1. 매우 넓은 창(예: 2560×1440 비율 흉내, 개발자 도구에서 커스텀 크기 입력)에서 Hero 이미지가 인물이 잘리지 않고 위/아래에 배경색 여백이 자연스럽게 보이는지 확인
