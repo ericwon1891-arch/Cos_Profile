@@ -1,0 +1,47 @@
+const VISITOR_ID_KEY = 'cosplay_visitor_id'
+
+export function getOrCreateVisitorId() {
+  let id = localStorage.getItem(VISITOR_ID_KEY)
+  if (!id) {
+    id = crypto.randomUUID()
+    localStorage.setItem(VISITOR_ID_KEY, id)
+  }
+  return id
+}
+
+export function getReferrerDomain(referrer, currentHostname = window.location.hostname) {
+  if (!referrer) return '직접 방문'
+  try {
+    const { hostname } = new URL(referrer)
+    return hostname === currentHostname ? '직접 방문' : hostname
+  } catch {
+    return '직접 방문'
+  }
+}
+
+export function groupByDate(rows) {
+  const counts = {}
+  for (const row of rows) {
+    const date = row.created_at.slice(0, 10)
+    counts[date] = (counts[date] ?? 0) + 1
+  }
+  return Object.entries(counts)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, count]) => ({ date, count }))
+}
+
+export function topReferrers(rows, limit = 5) {
+  const counts = {}
+  for (const row of rows) {
+    const domain = getReferrerDomain(row.referrer)
+    counts[domain] = (counts[domain] ?? 0) + 1
+  }
+  return Object.entries(counts)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, limit)
+    .map(([domain, count]) => ({ domain, count }))
+}
+
+export function countUniqueVisitors(rows) {
+  return new Set(rows.map(row => row.visitor_id)).size
+}
