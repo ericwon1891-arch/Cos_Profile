@@ -54,6 +54,7 @@ export default function CharactersForm({ data, onSave }) {
               onChange={items => onChange(index, { ...section, items })}
               newItem={{ id: Date.now(), title: '', category: section.categories[1] ?? '', thumbnail: '', photos: [] }}
               addLabel="캐릭터 추가"
+              reorderable
               renderItem={({ item, index: itemIndex, onChange: onItemChange }) => (
                 <>
                   <TextField label="캐릭터/작품명" value={item.title} onChange={v => onItemChange(itemIndex, { ...item, title: v })} />
