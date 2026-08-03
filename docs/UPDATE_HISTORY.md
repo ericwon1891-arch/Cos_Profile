@@ -101,8 +101,18 @@ Supabase Security Advisor에서 발견된 경고 6건을 검토, 기능에 영�
 - 배포 직후 실사용 중 발견: 일별 추이 막대그래프가 안 보이던 CSS 버그(`items-end` → `items-stretch`) 수정
 - 설계: `docs/superpowers/specs/2026-08-02-visitor-analytics-design.md`
 
+## 2026-08-03 — 방문자 참여도 지표 (체류시간·섹션조회·캐릭터클릭)
+
+- `page_events` 테이블 추가 — `duration`/`section_view`/`character_click` 세 종류 이벤트를 익명(`anon`) insert, 조회는 `authenticated`만 가능
+- `canTrackVisit`/`insertPageView`/`insertEvent` 공용 헬퍼로 정리, 기존 `usePageTracking`도 동일 헬퍼를 쓰도록 리팩터링
+- `useVisitDuration`: 탭이 백그라운드로 가거나 닫힐 때(`visibilitychange`) 체류 시간을 `fetch(keepalive:true)`로 기록
+- `useSectionViewTracking`: 모든 공개 섹션에 `data-track-label`을 부여하고 `IntersectionObserver`+`MutationObserver`로 방문당 섹션별 1회 조회 기록
+- 캐릭터 카드 클릭 시 `character_click` 이벤트 기록
+- `/admin` "방문자 분석"에 평균 체류 시간, 섹션별 조회수(전체), 인기 캐릭터 Top 5 추가
+- 설계: `docs/superpowers/specs/2026-08-03-visitor-engagement-metrics-design.md`
+
 ## 배포
 
 - 배포처: Vercel — org `nanary000`, project `cos-profile`, production URL `https://cos-profile.vercel.app`
 - 자동 배포(Git 연동) 미설정 — `vercel --prod`로 수동 배포
-- 현재 상태(2026-08-03 기준): 모든 기능 커밋 완료, 테스트 100개 전체 통과, 최신 커밋 프로덕션 배포 완료
+- 현재 상태(2026-08-03 기준): 모든 기능 커밋 완료, 테스트 127개 전체 통과, 최신 커밋 프로덕션 배포 완료
