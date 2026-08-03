@@ -14,9 +14,13 @@ import AdminLogin from './components/admin/AdminLogin'
 import AdminDashboard from './components/admin/AdminDashboard'
 import RequireAuth from './components/admin/RequireAuth'
 import { usePageTracking } from './hooks/usePageTracking'
+import { useSectionViewTracking } from './hooks/useSectionViewTracking'
+import { useVisitDuration } from './hooks/useVisitDuration'
 
 function PageTracker() {
   usePageTracking()
+  useSectionViewTracking()
+  useVisitDuration()
   return null
 }
 
