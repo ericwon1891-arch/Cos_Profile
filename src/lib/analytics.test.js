@@ -1,4 +1,15 @@
-import { getOrCreateVisitorId, getReferrerDomain, groupByDate, topReferrers, countUniqueVisitors } from './analytics'
+import {
+  getOrCreateVisitorId,
+  getReferrerDomain,
+  groupByDate,
+  topReferrers,
+  countUniqueVisitors,
+  canTrackVisit,
+  averageDuration,
+  formatDuration,
+  sectionViewCounts,
+  topCharacterClicks,
+} from './analytics'
 
 describe('getOrCreateVisitorId', () => {
   beforeEach(() => {
@@ -69,5 +80,64 @@ describe('countUniqueVisitors', () => {
   it('distinct visitor_id 개수를 센다', () => {
     const rows = [{ visitor_id: 'a' }, { visitor_id: 'b' }, { visitor_id: 'a' }]
     expect(countUniqueVisitors(rows)).toBe(2)
+  })
+})
+
+describe('canTrackVisit', () => {
+  it('loading 중이면 false를 반환한다', () => {
+    expect(canTrackVisit({ pathname: '/', session: null, loading: true })).toBe(false)
+  })
+
+  it('세션이 있으면(관리자) false를 반환한다', () => {
+    expect(canTrackVisit({ pathname: '/', session: { user: { id: '1' } }, loading: false })).toBe(false)
+  })
+
+  it('/admin 경로면 false를 반환한다', () => {
+    expect(canTrackVisit({ pathname: '/admin', session: null, loading: false })).toBe(false)
+  })
+
+  it('로딩이 끝났고 세션이 없고 /admin이 아니면 true를 반환한다', () => {
+    expect(canTrackVisit({ pathname: '/', session: null, loading: false })).toBe(true)
+  })
+})
+
+describe('averageDuration', () => {
+  it('value들의 평균을 반올림해 반환한다', () => {
+    const rows = [{ value: 10 }, { value: 15 }, { value: 20 }]
+    expect(averageDuration(rows)).toBe(15)
+  })
+
+  it('행이 없으면 null을 반환한다', () => {
+    expect(averageDuration([])).toBeNull()
+  })
+})
+
+describe('formatDuration', () => {
+  it('초를 "N분 M초" 형식으로 변환한다', () => {
+    expect(formatDuration(125)).toBe('2분 5초')
+  })
+
+  it('null이면 -을 반환한다', () => {
+    expect(formatDuration(null)).toBe('-')
+  })
+})
+
+describe('sectionViewCounts', () => {
+  it('label별로 세어 내림차순 전체를 반환한다', () => {
+    const rows = [{ label: 'Hero' }, { label: 'Hero' }, { label: 'Contact' }]
+    expect(sectionViewCounts(rows)).toEqual([
+      { label: 'Hero', count: 2 },
+      { label: 'Contact', count: 1 },
+    ])
+  })
+})
+
+describe('topCharacterClicks', () => {
+  it('label별로 세어 내림차순 상위 N개를 반환한다', () => {
+    const rows = [{ label: 'A' }, { label: 'A' }, { label: 'B' }, { label: 'C' }]
+    expect(topCharacterClicks(rows, 2)).toEqual([
+      { label: 'A', count: 2 },
+      { label: 'B', count: 1 },
+    ])
   })
 })
