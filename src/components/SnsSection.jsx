@@ -4,13 +4,13 @@ export default function SnsSection() {
   const { data, loading } = useSectionContent('sns')
 
   if (loading || !data) {
-    return <section id="sns" className="py-20 bg-[#f9f9f7]" />
+    return <section id="sns" data-track-label="SNS" className="py-20 bg-[#f9f9f7]" />
   }
 
   const { heading, platforms } = data
 
   return (
-    <section id="sns" className="py-20 bg-[#f9f9f7]">
+    <section id="sns" data-track-label="SNS" className="py-20 bg-[#f9f9f7]">
       <div className="max-w-3xl mx-auto px-6">
         <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">{heading}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">

@@ -4,13 +4,13 @@ export default function StrengthSection() {
   const { data, loading } = useSectionContent('strength')
 
   if (loading || !data) {
-    return <section id="strength" className="py-20 bg-[#0d0d0d]" />
+    return <section id="strength" data-track-label="Strength" className="py-20 bg-[#0d0d0d]" />
   }
 
   const { heading, items } = data
 
   return (
-    <section id="strength" className="py-20 bg-[#0d0d0d] text-white">
+    <section id="strength" data-track-label="Strength" className="py-20 bg-[#0d0d0d] text-white">
       <div className="max-w-3xl mx-auto px-6">
         <h2 className="text-3xl font-bold text-center mb-12">{heading}</h2>
         <ul className="space-y-6">

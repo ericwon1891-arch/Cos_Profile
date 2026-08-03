@@ -4,13 +4,13 @@ export default function ContactSection() {
   const { data, loading } = useSectionContent('contact')
 
   if (loading || !data) {
-    return <footer id="contact" className="bg-[#0d0d0d] py-16" />
+    return <footer id="contact" data-track-label="Contact" className="bg-[#0d0d0d] py-16" />
   }
 
   const { qrImage, links } = data
 
   return (
-    <footer id="contact" className="bg-[#0d0d0d] text-white py-16 text-center">
+    <footer id="contact" data-track-label="Contact" className="bg-[#0d0d0d] text-white py-16 text-center">
       <div className="max-w-xl mx-auto px-6">
         <h2 className="text-2xl font-bold mb-2">Contact</h2>
         <img

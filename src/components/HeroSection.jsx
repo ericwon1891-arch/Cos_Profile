@@ -4,7 +4,7 @@ export default function HeroSection() {
   const { data, loading } = useSectionContent('hero')
 
   if (loading || !data) {
-    return <section id="hero" className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e]" />
+    return <section id="hero" data-track-label="Hero" className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e]" />
   }
 
   const { photo, label, name, subtitle, quote, facts } = data
@@ -12,6 +12,7 @@ export default function HeroSection() {
   return (
     <section
       id="hero"
+      data-track-label="Hero"
       className="min-h-screen bg-gradient-to-b from-[#0a0a0a] to-[#1a1a2e] flex items-center justify-center text-white text-center px-6 relative overflow-hidden"
     >
       <img

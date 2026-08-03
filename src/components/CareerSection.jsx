@@ -4,13 +4,13 @@ export default function CareerSection() {
   const { data, loading } = useSectionContent('career')
 
   if (loading || !data) {
-    return <section id="career" className="py-20 bg-[#f9f9f7]" />
+    return <section id="career" data-track-label="Career" className="py-20 bg-[#f9f9f7]" />
   }
 
   const { heading, years } = data
 
   return (
-    <section id="career" className="py-20 bg-[#f9f9f7]">
+    <section id="career" data-track-label="Career" className="py-20 bg-[#f9f9f7]">
       <div className="max-w-2xl mx-auto px-6">
         <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">{heading}</h2>
         <div className="space-y-10">
