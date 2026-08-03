@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import WorkCard from './WorkCard'
 import PhotoModal from './PhotoModal'
+import { useAuth } from '../hooks/useAuth'
+import { canTrackVisit, getOrCreateVisitorId } from '../lib/analytics'
+import { insertEvent } from '../lib/tracking'
 
 const VISIBLE_COUNT = 6
 
 export default function CharacterSectionBlock({ section }) {
+  const { session, loading } = useAuth()
   const [activeFilter, setActiveFilter] = useState('전체')
   const [selectedWork, setSelectedWork] = useState(null)
   const [expanded, setExpanded] = useState(false)
@@ -22,8 +26,15 @@ export default function CharacterSectionBlock({ section }) {
     setExpanded(false)
   }
 
+  function handleSelectWork(work) {
+    setSelectedWork(work)
+    if (canTrackVisit({ pathname: '/', session, loading })) {
+      insertEvent({ eventType: 'character_click', label: work.title, visitorId: getOrCreateVisitorId() })
+    }
+  }
+
   return (
-    <section id={`characters-${id}`} className="py-20 bg-[#f9f9f7]">
+    <section id={`characters-${id}`} data-track-label={heading} className="py-20 bg-[#f9f9f7]">
       <div className="max-w-6xl mx-auto px-6">
         <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">{heading}</h2>
         <div className="flex gap-3 justify-center mb-10 flex-wrap">
@@ -43,7 +54,7 @@ export default function CharacterSectionBlock({ section }) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {visible.map(item => (
-            <WorkCard key={item.id} work={item} onClick={setSelectedWork} />
+            <WorkCard key={item.id} work={item} onClick={handleSelectWork} />
           ))}
         </div>
         {limitEnabled && filtered.length > VISIBLE_COUNT && !expanded && (

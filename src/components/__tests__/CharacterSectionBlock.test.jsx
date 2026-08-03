@@ -1,5 +1,19 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import CharacterSectionBlock from '../CharacterSectionBlock'
+import { useAuth } from '../../hooks/useAuth'
+import { canTrackVisit, getOrCreateVisitorId } from '../../lib/analytics'
+import { insertEvent } from '../../lib/tracking'
+
+vi.mock('../../hooks/useAuth', () => ({
+  useAuth: vi.fn(),
+}))
+vi.mock('../../lib/analytics', () => ({
+  canTrackVisit: vi.fn(),
+  getOrCreateVisitorId: vi.fn(),
+}))
+vi.mock('../../lib/tracking', () => ({
+  insertEvent: vi.fn(),
+}))
 
 const mockSection = {
   id: 'photo',
@@ -27,6 +41,12 @@ const manyItemsSection = {
 }
 
 describe('CharacterSectionBlock', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    useAuth.mockReturnValue({ session: null, loading: false })
+    canTrackVisit.mockReturnValue(false)
+  })
+
   it('섹션 제목을 표시한다', () => {
     render(<CharacterSectionBlock section={mockSection} />)
     expect(screen.getByText('대표 캐릭터 - 사진')).toBeInTheDocument()
@@ -99,5 +119,31 @@ describe('CharacterSectionBlock', () => {
     render(<CharacterSectionBlock section={disabledSection} />)
     expect(screen.getAllByTestId('work-card')).toHaveLength(8)
     expect(screen.queryByRole('button', { name: '더보기' })).not.toBeInTheDocument()
+  })
+
+  it('section에 heading을 data-track-label로 갖는다', () => {
+    const { container } = render(<CharacterSectionBlock section={mockSection} />)
+    expect(container.querySelector('#characters-photo')).toHaveAttribute('data-track-label', '대표 캐릭터 - 사진')
+  })
+
+  it('관리자가 아니면 카드 클릭 시 character_click 이벤트를 기록한다', () => {
+    canTrackVisit.mockReturnValue(true)
+    getOrCreateVisitorId.mockReturnValue('visitor-1')
+    render(<CharacterSectionBlock section={mockSection} />)
+    fireEvent.click(screen.getAllByTestId('work-card')[0])
+
+    expect(insertEvent).toHaveBeenCalledWith({
+      eventType: 'character_click',
+      label: '캐릭터 1',
+      visitorId: 'visitor-1',
+    })
+  })
+
+  it('관리자면 카드를 클릭해도 이벤트를 기록하지 않는다', () => {
+    canTrackVisit.mockReturnValue(false)
+    render(<CharacterSectionBlock section={mockSection} />)
+    fireEvent.click(screen.getAllByTestId('work-card')[0])
+
+    expect(insertEvent).not.toHaveBeenCalled()
   })
 })
