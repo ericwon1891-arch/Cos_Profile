@@ -1,27 +1,20 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { supabase } from '../lib/supabaseClient'
 import { useAuth } from './useAuth'
-import { getOrCreateVisitorId } from '../lib/analytics'
+import { canTrackVisit, getOrCreateVisitorId } from '../lib/analytics'
+import { insertPageView } from '../lib/tracking'
 
 export function usePageTracking() {
   const location = useLocation()
   const { session, loading } = useAuth()
 
   useEffect(() => {
-    if (loading) return
-    if (session) return
-    if (location.pathname.startsWith('/admin')) return
+    if (!canTrackVisit({ pathname: location.pathname, session, loading })) return
 
-    supabase
-      .from('page_views')
-      .insert({
-        path: location.pathname,
-        referrer: document.referrer || null,
-        visitor_id: getOrCreateVisitorId(),
-      })
-      .then(({ error }) => {
-        if (error) console.error('페이지뷰 기록 실패', error)
-      })
+    insertPageView({
+      path: location.pathname,
+      referrer: document.referrer || null,
+      visitorId: getOrCreateVisitorId(),
+    })
   }, [location.pathname, session, loading])
 }
