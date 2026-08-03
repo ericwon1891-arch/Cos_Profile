@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
-import { groupByDate, topReferrers, countUniqueVisitors } from '../../../lib/analytics'
+import {
+  groupByDate,
+  topReferrers,
+  countUniqueVisitors,
+  averageDuration,
+  formatDuration,
+  sectionViewCounts,
+  topCharacterClicks,
+} from '../../../lib/analytics'
 
 const RANGES = [
   { key: '7d', label: '7일', days: 7 },
@@ -11,25 +19,38 @@ const RANGES = [
 export default function VisitorAnalytics() {
   const [rangeKey, setRangeKey] = useState('7d')
   const [reloadToken, setReloadToken] = useState(0)
-  const [state, setState] = useState({ rows: null, loading: true, error: null })
+  const [state, setState] = useState({ rows: null, eventRows: null, loading: true, error: null })
 
   useEffect(() => {
     let cancelled = false
-    setState({ rows: null, loading: true, error: null })
+    setState({ rows: null, eventRows: null, loading: true, error: null })
 
-    async function fetchRows() {
+    async function fetchAll() {
       const range = RANGES.find(r => r.key === rangeKey)
-      let query = supabase.from('page_views').select('created_at, referrer, visitor_id')
-      if (range.days !== null) {
-        const since = new Date(Date.now() - range.days * 24 * 60 * 60 * 1000).toISOString()
-        query = query.gte('created_at', since)
+      const since = range.days !== null
+        ? new Date(Date.now() - range.days * 24 * 60 * 60 * 1000).toISOString()
+        : null
+
+      function withRange(query) {
+        return since !== null ? query.gte('created_at', since) : query
       }
-      const { data, error } = await query
+
+      const [viewsResult, eventsResult] = await Promise.all([
+        withRange(supabase.from('page_views').select('created_at, referrer, visitor_id')),
+        withRange(supabase.from('page_events').select('event_type, label, value')),
+      ])
+
       if (cancelled) return
-      setState({ rows: error ? null : data, loading: false, error: error ?? null })
+
+      const error = viewsResult.error ?? eventsResult.error
+      if (error) {
+        setState({ rows: null, eventRows: null, loading: false, error })
+        return
+      }
+      setState({ rows: viewsResult.data, eventRows: eventsResult.data, loading: false, error: null })
     }
 
-    fetchRows()
+    fetchAll()
 
     return () => { cancelled = true }
   }, [rangeKey, reloadToken])
@@ -54,9 +75,17 @@ export default function VisitorAnalytics() {
   }
 
   const rows = state.rows
+  const eventRows = state.eventRows
   const daily = groupByDate(rows)
   const referrers = topReferrers(rows)
   const maxCount = Math.max(1, ...daily.map(d => d.count))
+
+  const durationRows = eventRows.filter(e => e.event_type === 'duration')
+  const sectionRows = eventRows.filter(e => e.event_type === 'section_view')
+  const characterRows = eventRows.filter(e => e.event_type === 'character_click')
+  const avgDuration = averageDuration(durationRows)
+  const sectionCounts = sectionViewCounts(sectionRows)
+  const topCharacters = topCharacterClicks(characterRows)
 
   return (
     <div>
@@ -75,7 +104,7 @@ export default function VisitorAnalytics() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="border rounded p-4">
           <p className="text-sm text-gray-500">총 방문 수</p>
           <p className="text-2xl font-bold">{rows.length}</p>
@@ -83,6 +112,10 @@ export default function VisitorAnalytics() {
         <div className="border rounded p-4">
           <p className="text-sm text-gray-500">순 방문자 수</p>
           <p className="text-2xl font-bold">{countUniqueVisitors(rows)}</p>
+        </div>
+        <div className="border rounded p-4">
+          <p className="text-sm text-gray-500">평균 체류 시간</p>
+          <p className="text-2xl font-bold">{formatDuration(avgDuration)}</p>
         </div>
       </div>
 
@@ -103,13 +136,39 @@ export default function VisitorAnalytics() {
       )}
 
       <h3 className="text-sm font-medium text-gray-700 mb-2">유입 경로 Top 5</h3>
-      {referrers.length === 0 && <p className="text-sm text-gray-400">데이터가 없습니다.</p>}
+      {referrers.length === 0 && <p className="text-sm text-gray-400 mb-8">데이터가 없습니다.</p>}
       {referrers.length > 0 && (
-        <ul className="space-y-1">
+        <ul className="space-y-1 mb-8">
           {referrers.map(r => (
             <li key={r.domain} className="flex justify-between text-sm border-b py-1">
               <span>{r.domain}</span>
               <span className="text-gray-500">{r.count}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h3 className="text-sm font-medium text-gray-700 mb-2">섹션별 조회수</h3>
+      {sectionCounts.length === 0 && <p className="text-sm text-gray-400 mb-8">데이터가 없습니다.</p>}
+      {sectionCounts.length > 0 && (
+        <ul className="space-y-1 mb-8">
+          {sectionCounts.map(s => (
+            <li key={s.label} className="flex justify-between text-sm border-b py-1">
+              <span>{s.label}</span>
+              <span className="text-gray-500">{s.count}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h3 className="text-sm font-medium text-gray-700 mb-2">인기 캐릭터 Top 5</h3>
+      {topCharacters.length === 0 && <p className="text-sm text-gray-400">데이터가 없습니다.</p>}
+      {topCharacters.length > 0 && (
+        <ul className="space-y-1">
+          {topCharacters.map(c => (
+            <li key={c.label} className="flex justify-between text-sm border-b py-1">
+              <span>{c.label}</span>
+              <span className="text-gray-500">{c.count}</span>
             </li>
           ))}
         </ul>
