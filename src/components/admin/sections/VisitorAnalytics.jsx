@@ -89,7 +89,7 @@ export default function VisitorAnalytics() {
       <h3 className="text-sm font-medium text-gray-700 mb-2">일별 방문 추이</h3>
       {daily.length === 0 && <p className="text-sm text-gray-400 mb-8">데이터가 없습니다.</p>}
       {daily.length > 0 && (
-        <div className="flex items-end gap-1 h-32 mb-8">
+        <div className="flex items-stretch gap-1 h-32 mb-8">
           {daily.map(d => (
             <div key={d.date} className="flex-1 flex flex-col items-center justify-end">
               <div
