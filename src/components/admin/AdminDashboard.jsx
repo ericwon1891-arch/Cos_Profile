@@ -13,6 +13,7 @@ import ServicesForm from './sections/ServicesForm'
 import PersonalityForm from './sections/PersonalityForm'
 import ContactForm from './sections/ContactForm'
 import AccountForm from './sections/AccountForm'
+import VisitorAnalytics from './sections/VisitorAnalytics'
 
 const SECTIONS = [
   { key: 'hero', label: 'Hero', Form: HeroForm },
@@ -25,13 +26,16 @@ const SECTIONS = [
   { key: 'services', label: 'Additional Services', Form: ServicesForm },
   { key: 'personality', label: 'Personality', Form: PersonalityForm },
   { key: 'contact', label: 'Contact', Form: ContactForm },
+  { key: 'analytics', label: '방문자 분석' },
   { key: 'account', label: '계정 설정' },
 ]
+
+const NO_CONTENT_KEYS = ['account', 'analytics']
 
 export default function AdminDashboard() {
   const { signOut } = useAuth()
   const [activeKey, setActiveKey] = useState(SECTIONS[0].key)
-  const { data, loading } = useSectionContent(activeKey === 'account' ? null : activeKey)
+  const { data, loading } = useSectionContent(NO_CONTENT_KEYS.includes(activeKey) ? null : activeKey)
   const [status, setStatus] = useState(null)
 
   async function handleSave(newData) {
@@ -83,10 +87,11 @@ export default function AdminDashboard() {
         </nav>
         <main className="flex-1 p-8 max-w-2xl">
           {activeKey === 'account' && <AccountForm />}
-          {activeKey !== 'account' && !loading && data && active && (
+          {activeKey === 'analytics' && <VisitorAnalytics />}
+          {!NO_CONTENT_KEYS.includes(activeKey) && !loading && data && active && (
             <active.Form data={data} onSave={handleSave} />
           )}
-          {activeKey !== 'account' && !loading && !data && (
+          {!NO_CONTENT_KEYS.includes(activeKey) && !loading && !data && (
             <p className="text-gray-500 text-sm">이 섹션의 데이터가 없습니다. supabase/seed.sql을 실행했는지 확인해 주세요.</p>
           )}
         </main>
