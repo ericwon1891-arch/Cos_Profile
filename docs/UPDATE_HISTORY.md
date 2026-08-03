@@ -89,12 +89,15 @@ Supabase Security Advisor에서 발견된 경고 6건을 검토, 기능에 영�
 - 경고 6→3건으로 감소. 남은 3건은 대응 안 함: `site_content`의 insert/update RLS 정책이 `USING(true)`인 것은 관리자 1인이 전 섹션을 편집하는 CMS 구조상 의도된 설계, 유출 비밀번호 보호(Leaked Password Protection)는 Supabase Pro 플랜부터 지원돼 Free 플랜에서는 활성화 불가
 - 적용: `supabase/update-security-hardening.sql`
 
+## 2026-08-02 — 캐릭터 섹션 카드 순서 변경
+
+- 캐릭터 섹션 안의 캐릭터 카드 리스트에 기존 `ListField`의 `reorderable` 드래그 정렬을 적용 (기존 섹션 자체/갤러리 사진 순서 변경과 동일한 패턴 재사용)
+
 ## 2026-08-03 — 방문자 분석
 
 - `page_views` 테이블 추가 — 공개 페이지 방문 시 익명(`anon`) insert, 조회는 `authenticated`만 가능, update/delete 정책 없음
 - `usePageTracking` 훅: 라우트 변경마다 페이지뷰 기록, 관리자 세션·`/admin` 경로는 제외 (단, 세션이 `sessionStorage`에 저장되므로 시크릿창/새 탭은 별도 익명 방문으로 집계됨 — 의도된 동작)
 - `/admin`에 "방문자 분석" 탭 추가 — 총 방문/순 방문자/일별 추이(CSS 막대)/유입 경로(레퍼러) Top 5
-- 캐릭터 섹션 내 캐릭터 카드 순서 변경(`reorderable`) 기능도 함께 추가 (기존 섹션/갤러리 사진 순서 변경과 동일한 패턴)
 - 배포 직후 실사용 중 발견: 일별 추이 막대그래프가 안 보이던 CSS 버그(`items-end` → `items-stretch`) 수정
 - 설계: `docs/superpowers/specs/2026-08-02-visitor-analytics-design.md`
 
