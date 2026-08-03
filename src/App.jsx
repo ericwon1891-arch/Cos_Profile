@@ -13,6 +13,12 @@ import ContactSection from './components/ContactSection'
 import AdminLogin from './components/admin/AdminLogin'
 import AdminDashboard from './components/admin/AdminDashboard'
 import RequireAuth from './components/admin/RequireAuth'
+import { usePageTracking } from './hooks/usePageTracking'
+
+function PageTracker() {
+  usePageTracking()
+  return null
+}
 
 function PublicSite() {
   return (
@@ -35,6 +41,7 @@ function PublicSite() {
 export default function App() {
   return (
     <BrowserRouter>
+      <PageTracker />
       <Routes>
         <Route path="/" element={<PublicSite />} />
         <Route path="/admin/login" element={<AdminLogin />} />
