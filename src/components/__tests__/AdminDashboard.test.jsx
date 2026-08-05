@@ -19,6 +19,9 @@ vi.mock('../../lib/supabaseClient', () => ({
 vi.mock('../admin/sections/VisitorAnalytics', () => ({
   default: () => <div>방문자 분석 화면</div>,
 }))
+vi.mock('../admin/sections/StorageUsage', () => ({
+  default: () => <div>스토리지 사용량 화면</div>,
+}))
 
 const heroData = { photo: '', label: '', name: '', subtitle: '', quote: '', facts: [] }
 
@@ -65,6 +68,15 @@ describe('AdminDashboard', () => {
     fireEvent.click(screen.getByRole('button', { name: '방문자 분석' }))
 
     expect(screen.getByText('방문자 분석 화면')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '저장' })).not.toBeInTheDocument()
+    expect(useSectionContent).toHaveBeenCalledWith(null)
+  })
+
+  it('스토리지 사용량 메뉴를 클릭하면 StorageUsage를 보여준다', () => {
+    render(<AdminDashboard />)
+    fireEvent.click(screen.getByRole('button', { name: '스토리지 사용량' }))
+
+    expect(screen.getByText('스토리지 사용량 화면')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '저장' })).not.toBeInTheDocument()
     expect(useSectionContent).toHaveBeenCalledWith(null)
   })
