@@ -29,4 +29,20 @@ describe('extractMediaPaths', () => {
   it('data가 빈 객체면 빈 배열을 반환한다', () => {
     expect(extractMediaPaths({})).toEqual([])
   })
+
+  it('URL 인코딩된 경로(공백 등)를 디코딩해서 반환한다 (스토리지의 실제 파일명과 일치시키기 위함)', () => {
+    const data = {
+      hero: {
+        photo: 'https://x.supabase.co/storage/v1/object/public/media/1784637595016-title_1%20copy.jpg',
+      },
+    }
+    expect(extractMediaPaths(data)).toEqual(['1784637595016-title_1 copy.jpg'])
+  })
+
+  it('잘못된 percent-encoding이 있어도 에러 없이 원본 문자열을 반환한다', () => {
+    const data = {
+      broken: 'https://x.supabase.co/storage/v1/object/public/media/broken%file.jpg',
+    }
+    expect(extractMediaPaths(data)).toEqual(['broken%file.jpg'])
+  })
 })
