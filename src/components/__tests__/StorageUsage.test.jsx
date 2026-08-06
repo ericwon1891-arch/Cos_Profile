@@ -8,7 +8,10 @@ vi.mock('../../lib/supabaseClient', () => ({
 
 function mockList(result) {
   const list = vi.fn().mockResolvedValue(result)
-  supabase.storage.from.mockReturnValue({ list })
+  const getPublicUrl = vi.fn(path => ({
+    data: { publicUrl: `https://example.com/storage/v1/object/public/media/${path}` },
+  }))
+  supabase.storage.from.mockReturnValue({ list, getPublicUrl })
   return list
 }
 
@@ -65,5 +68,29 @@ describe('StorageUsage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '다시 시도' }))
     await waitFor(() => expect(list).toHaveBeenCalledTimes(2))
+  })
+
+  it('용량 큰 파일 항목에 썸네일 미리보기와 원본 링크를 표시한다', async () => {
+    mockList({
+      data: [{ name: 'big.jpg', metadata: { size: 5 * 1024 * 1024 } }],
+      error: null,
+    })
+
+    render(<StorageUsage />)
+
+    await screen.findByText('용량 큰 파일 Top 10')
+    const img = screen.getByAltText('big.jpg')
+    expect(img).toHaveAttribute(
+      'src',
+      'https://example.com/storage/v1/object/public/media/big.jpg'
+    )
+
+    const link = img.closest('a')
+    expect(link).toHaveAttribute(
+      'href',
+      'https://example.com/storage/v1/object/public/media/big.jpg'
+    )
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noreferrer')
   })
 })
