@@ -7,8 +7,12 @@ vi.mock('../../lib/supabaseClient', () => ({
 }))
 
 function mockGetPublicUrl() {
-  const getPublicUrl = vi.fn(name => ({
-    data: { publicUrl: `https://example.com/storage/v1/object/public/media/${name}` },
+  const getPublicUrl = vi.fn((name, options) => ({
+    data: {
+      publicUrl: options?.transform
+        ? `https://example.com/storage/v1/render/image/public/media/${name}?width=${options.transform.width}&height=${options.transform.height}`
+        : `https://example.com/storage/v1/object/public/media/${name}`,
+    },
   }))
   supabase.storage.from.mockReturnValue({ getPublicUrl })
   return getPublicUrl
@@ -34,6 +38,29 @@ describe('StorageTrash', () => {
 
     expect(screen.getByText('a.jpg')).toBeInTheDocument()
     expect(screen.getByText('11일 후 영구 삭제')).toBeInTheDocument()
+  })
+
+  it('축소된 썸네일을 지연 로드하고, 원본 링크는 그대로 유지한다', () => {
+    mockGetPublicUrl()
+    render(
+      <StorageTrash
+        files={[{ name: 'trash/a.jpg', size: 1024, updatedAt: new Date().toISOString() }]}
+        onRestore={vi.fn()}
+        onPermanentDelete={vi.fn()}
+      />
+    )
+
+    const img = screen.getByAltText('a.jpg')
+    expect(img).toHaveAttribute(
+      'src',
+      'https://example.com/storage/v1/render/image/public/media/trash/a.jpg?width=80&height=80'
+    )
+    expect(img).toHaveAttribute('loading', 'lazy')
+    expect(img).toHaveAttribute('decoding', 'async')
+    expect(img.closest('a')).toHaveAttribute(
+      'href',
+      'https://example.com/storage/v1/object/public/media/trash/a.jpg'
+    )
   })
 
   it('"복원" 버튼을 누르면 onRestore를 원래(휴지통) 경로로 호출한다', () => {
