@@ -7,8 +7,12 @@ vi.mock('../../lib/supabaseClient', () => ({
 }))
 
 function mockGetPublicUrl() {
-  const getPublicUrl = vi.fn(name => ({
-    data: { publicUrl: `https://example.com/storage/v1/object/public/media/${name}` },
+  const getPublicUrl = vi.fn((name, options) => ({
+    data: {
+      publicUrl: options?.transform
+        ? `https://example.com/storage/v1/render/image/public/media/${name}?width=${options.transform.width}&height=${options.transform.height}`
+        : `https://example.com/storage/v1/object/public/media/${name}`,
+    },
   }))
   supabase.storage.from.mockReturnValue({ getPublicUrl })
   return getPublicUrl
@@ -21,12 +25,19 @@ describe('StorageFileList', () => {
     expect(screen.getByText('파일이 없습니다.')).toBeInTheDocument()
   })
 
-  it('파일마다 썸네일과 체크박스를 표시하고, 선택 전에는 삭제 버튼이 없다', () => {
+  it('파일마다 축소된 썸네일과 원본 링크, 체크박스를 표시하고, 선택 전에는 삭제 버튼이 없다', () => {
     mockGetPublicUrl()
     render(<StorageFileList files={[{ name: 'a.jpg', size: 1024 }]} onDelete={vi.fn()} />)
 
-    expect(screen.getByAltText('a.jpg')).toHaveAttribute(
+    const img = screen.getByAltText('a.jpg')
+    expect(img).toHaveAttribute(
       'src',
+      'https://example.com/storage/v1/render/image/public/media/a.jpg?width=80&height=80'
+    )
+    expect(img).toHaveAttribute('loading', 'lazy')
+    expect(img).toHaveAttribute('decoding', 'async')
+    expect(img.closest('a')).toHaveAttribute(
+      'href',
       'https://example.com/storage/v1/object/public/media/a.jpg'
     )
     expect(screen.queryByRole('button', { name: /선택 삭제/ })).not.toBeInTheDocument()

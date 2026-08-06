@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
-import { formatBytes } from '../../../lib/storageUsage'
+import { formatBytes, THUMBNAIL_TRANSFORM } from '../../../lib/storageUsage'
 
 export default function StorageFileList({ files, usedPaths = new Set(), onDelete }) {
   const [selected, setSelected] = useState([])
@@ -50,6 +50,9 @@ export default function StorageFileList({ files, usedPaths = new Set(), onDelete
       <ul className="space-y-1">
         {files.map(f => {
           const publicUrl = supabase.storage.from('media').getPublicUrl(f.name).data.publicUrl
+          const thumbnailUrl = supabase.storage
+            .from('media')
+            .getPublicUrl(f.name, { transform: THUMBNAIL_TRANSFORM }).data.publicUrl
           return (
             <li key={f.name} className="flex items-center justify-between text-sm border-b py-1">
               <span className="flex items-center gap-2 min-w-0">
@@ -61,8 +64,10 @@ export default function StorageFileList({ files, usedPaths = new Set(), onDelete
                 />
                 <a href={publicUrl} target="_blank" rel="noreferrer">
                   <img
-                    src={publicUrl}
+                    src={thumbnailUrl}
                     alt={f.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-10 h-10 object-cover rounded shrink-0"
                   />
                 </a>
