@@ -12,6 +12,7 @@ import {
   describeStorageActionError,
   STORAGE_LIMIT_GB,
   TRASH_PREFIX,
+  THUMBNAIL_TRANSFORM,
 } from '../../../lib/storageUsage'
 import { extractMediaPaths } from '../../../lib/mediaUsage'
 import StorageFileList from './StorageFileList'
@@ -154,13 +155,18 @@ export default function StorageUsage() {
         <ul className="space-y-1 mb-8">
           {largest.map(f => {
             const publicUrl = supabase.storage.from('media').getPublicUrl(f.name).data.publicUrl
+            const thumbnailUrl = supabase.storage
+              .from('media')
+              .getPublicUrl(f.name, { transform: THUMBNAIL_TRANSFORM }).data.publicUrl
             return (
               <li key={f.name} className="flex items-center justify-between text-sm border-b py-1">
                 <span className="flex items-center gap-2 min-w-0">
                   <a href={publicUrl} target="_blank" rel="noreferrer">
                     <img
-                      src={publicUrl}
+                      src={thumbnailUrl}
                       alt={f.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-10 h-10 object-cover rounded shrink-0"
                     />
                   </a>

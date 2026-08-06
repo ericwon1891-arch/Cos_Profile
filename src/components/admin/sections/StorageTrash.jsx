@@ -1,5 +1,5 @@
 import { supabase } from '../../../lib/supabaseClient'
-import { formatBytes, daysUntilExpiry, stripTrashPrefix } from '../../../lib/storageUsage'
+import { formatBytes, daysUntilExpiry, stripTrashPrefix, THUMBNAIL_TRANSFORM } from '../../../lib/storageUsage'
 
 export default function StorageTrash({ files, onRestore, onPermanentDelete, onEmptyTrash }) {
   if (files.length === 0) {
@@ -28,6 +28,9 @@ export default function StorageTrash({ files, onRestore, onPermanentDelete, onEm
       <ul className="space-y-1">
         {files.map(f => {
           const publicUrl = supabase.storage.from('media').getPublicUrl(f.name).data.publicUrl
+          const thumbnailUrl = supabase.storage
+            .from('media')
+            .getPublicUrl(f.name, { transform: THUMBNAIL_TRANSFORM }).data.publicUrl
           const displayName = stripTrashPrefix(f.name)
           const remaining = daysUntilExpiry(f.updatedAt)
           return (
@@ -35,8 +38,10 @@ export default function StorageTrash({ files, onRestore, onPermanentDelete, onEm
               <span className="flex items-center gap-2 min-w-0">
                 <a href={publicUrl} target="_blank" rel="noreferrer">
                   <img
-                    src={publicUrl}
+                    src={thumbnailUrl}
                     alt={displayName}
+                    loading="lazy"
+                    decoding="async"
                     className="w-10 h-10 object-cover rounded shrink-0"
                   />
                 </a>

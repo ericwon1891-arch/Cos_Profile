@@ -56,6 +56,10 @@ export function isExpired(updatedAt, now = Date.now()) {
   return daysUntilExpiry(updatedAt, now) <= 0
 }
 
+// 목록의 40px 썸네일에 원본 이미지(수 MB) 전체를 내려받지 않도록 Supabase 이미지
+// 변환 API로 80px(2x 대응) 리사이즈본을 요청한다. 목록 스크롤 버벅임의 원인이었음.
+export const THUMBNAIL_TRANSFORM = { width: 80, height: 80, resize: 'cover' }
+
 export function describeStorageActionError(error) {
   if (/row-level security|not authorized|unauthorized/i.test(error.message)) {
     return '로그인이 만료되었습니다. 새로고침 후 다시 로그인해 주세요.'
