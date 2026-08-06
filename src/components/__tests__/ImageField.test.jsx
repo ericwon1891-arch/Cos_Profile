@@ -52,4 +52,24 @@ describe('ImageField', () => {
     )
     expect(onChange).not.toHaveBeenCalled()
   })
+
+  it('로그인 만료(RLS) 에러 시 재로그인 안내 alert를 띄운다', async () => {
+    const upload = vi.fn().mockResolvedValue({
+      error: { message: 'new row violates row-level security policy' },
+    })
+    supabase.storage.from.mockReturnValue({ upload, getPublicUrl: vi.fn() })
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    const onChange = vi.fn()
+
+    const { container } = render(<ImageField label="배경 사진" value="" onChange={onChange} />)
+    const input = container.querySelector('input[type="file"]')
+    fireEvent.change(input, { target: { files: [makeFile('big.jpg')] } })
+
+    await waitFor(() =>
+      expect(alertSpy).toHaveBeenCalledWith(
+        '업로드 실패: 로그인이 만료되었습니다. 새로고침 후 다시 로그인해 주세요.'
+      )
+    )
+    expect(onChange).not.toHaveBeenCalled()
+  })
 })

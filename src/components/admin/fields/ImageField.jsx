@@ -1,5 +1,6 @@
 import { supabase } from '../../../lib/supabaseClient'
 import { buildUploadPath } from '../../../lib/uploadPath'
+import { classifyUploadError } from '../../../lib/uploadErrors'
 
 export default function ImageField({ label, value, onChange, hint }) {
   async function handleFileChange(e) {
@@ -9,12 +10,7 @@ export default function ImageField({ label, value, onChange, hint }) {
     const path = buildUploadPath(file.name)
     const { error } = await supabase.storage.from('media').upload(path, file)
     if (error) {
-      const isTooLarge = error.statusCode === '413' || /exceeded|too large/i.test(error.message)
-      alert(
-        isTooLarge
-          ? '업로드 실패: 파일 용량이 너무 큽니다. 더 작은 이미지로 줄여서 다시 시도해 주세요.'
-          : `업로드 실패: ${error.message}`
-      )
+      alert(classifyUploadError(error))
       return
     }
 
