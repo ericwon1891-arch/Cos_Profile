@@ -13,27 +13,32 @@ import {
   STORAGE_LIMIT_GB,
   TRASH_PREFIX,
 } from '../../../lib/storageUsage'
+import { extractMediaPaths } from '../../../lib/mediaUsage'
 import StorageFileList from './StorageFileList'
 import StorageTrash from './StorageTrash'
 
 export default function StorageUsage() {
   const [reloadToken, setReloadToken] = useState(0)
   const [showAllFiles, setShowAllFiles] = useState(false)
-  const [state, setState] = useState({ rootFiles: null, trashFiles: null, loading: true, error: null })
+  const [state, setState] = useState({ rootFiles: null, trashFiles: null, usedPaths: null, loading: true, error: null })
 
   useEffect(() => {
     let cancelled = false
-    setState({ rootFiles: null, trashFiles: null, loading: true, error: null })
+    setState({ rootFiles: null, trashFiles: null, usedPaths: null, loading: true, error: null })
 
     async function fetchFiles() {
       try {
-        const [rootRaw, trashRaw] = await Promise.all([
+        const [rootRaw, trashRaw, contentRows] = await Promise.all([
           fetchAllStorageFiles((offset, limit) =>
             supabase.storage.from('media').list('', { limit, offset, sortBy: { column: 'name', order: 'asc' } })
           ),
           fetchAllStorageFiles((offset, limit) =>
             supabase.storage.from('media').list('trash', { limit, offset, sortBy: { column: 'name', order: 'asc' } })
           ),
+          supabase.from('site_content').select('data').then(({ data, error }) => {
+            if (error) throw error
+            return data
+          }),
         ])
 
         const rootFiles = rootRaw.filter(f => !isFolderPlaceholder(f))
@@ -48,11 +53,13 @@ export default function StorageUsage() {
           await supabase.storage.from('media').remove(expired.map(f => f.name))
         }
 
+        const usedPaths = new Set(contentRows.flatMap(row => extractMediaPaths(row.data)))
+
         if (cancelled) return
-        setState({ rootFiles, trashFiles: active, loading: false, error: null })
+        setState({ rootFiles, trashFiles: active, usedPaths, loading: false, error: null })
       } catch (error) {
         if (cancelled) return
-        setState({ rootFiles: null, trashFiles: null, loading: false, error })
+        setState({ rootFiles: null, trashFiles: null, usedPaths: null, loading: false, error })
       }
     }
 
@@ -109,7 +116,7 @@ export default function StorageUsage() {
     )
   }
 
-  const { rootFiles, trashFiles } = state
+  const { rootFiles, trashFiles, usedPaths } = state
   const usedBytes = totalBytes(rootFiles) + totalBytes(trashFiles)
   const percent = usagePercent(usedBytes, STORAGE_LIMIT_GB)
   const largest = topLargestFiles(rootFiles, 10)
@@ -165,7 +172,7 @@ export default function StorageUsage() {
       </button>
       {showAllFiles && (
         <div className="mb-8">
-          <StorageFileList files={allFiles} onDelete={handleDelete} />
+          <StorageFileList files={allFiles} usedPaths={usedPaths} onDelete={handleDelete} />
         </div>
       )}
 
