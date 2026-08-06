@@ -3,10 +3,10 @@ import StorageUsage from '../admin/sections/StorageUsage'
 import { supabase } from '../../lib/supabaseClient'
 
 vi.mock('../../lib/supabaseClient', () => ({
-  supabase: { storage: { from: vi.fn() } },
+  supabase: { storage: { from: vi.fn() }, from: vi.fn() },
 }))
 
-function mockStorage({ root = [], trash = [] } = {}) {
+function mockStorage({ root = [], trash = [], content = [] } = {}) {
   const list = vi.fn(path => {
     if (path === 'trash') return Promise.resolve({ data: trash, error: null })
     return Promise.resolve({ data: root, error: null })
@@ -17,7 +17,14 @@ function mockStorage({ root = [], trash = [] } = {}) {
   const move = vi.fn().mockResolvedValue({ error: null })
   const remove = vi.fn().mockResolvedValue({ error: null })
   supabase.storage.from.mockReturnValue({ list, getPublicUrl, move, remove })
-  return { list, getPublicUrl, move, remove }
+
+  const select = vi.fn().mockResolvedValue({
+    data: content.map(data => ({ data })),
+    error: null,
+  })
+  supabase.from.mockReturnValue({ select })
+
+  return { list, getPublicUrl, move, remove, select }
 }
 
 describe('StorageUsage', () => {
@@ -113,6 +120,9 @@ describe('StorageUsage', () => {
       data: { publicUrl: `https://example.com/storage/v1/object/public/media/${name}` },
     }))
     supabase.storage.from.mockReturnValue({ list, getPublicUrl, move: vi.fn(), remove: vi.fn() })
+    supabase.from.mockReturnValue({
+      select: vi.fn().mockResolvedValue({ data: [], error: null }),
+    })
 
     render(<StorageUsage />)
 
@@ -186,5 +196,38 @@ describe('StorageUsage', () => {
 
     await waitFor(() => expect(remove).toHaveBeenCalledWith(['trash/a.jpg']))
     confirmSpy.mockRestore()
+  })
+
+  it('게시된 콘텐츠에서 참조되지 않는 파일에는 미사용 배지를, 참조되는 파일에는 표시하지 않는다', async () => {
+    mockStorage({
+      root: [
+        { id: '1', name: 'used.jpg', updated_at: new Date().toISOString(), metadata: { size: 1024 } },
+        { id: '2', name: 'orphan.jpg', updated_at: new Date().toISOString(), metadata: { size: 1024 } },
+      ],
+      content: [
+        { hero: { imageUrl: 'https://example.com/storage/v1/object/public/media/used.jpg' } },
+      ],
+    })
+
+    render(<StorageUsage />)
+
+    await screen.findByText('총 사용량')
+    fireEvent.click(screen.getByRole('button', { name: '전체 파일 보기' }))
+
+    const usedItem = screen.getByLabelText('used.jpg 선택').closest('li')
+    const orphanItem = screen.getByLabelText('orphan.jpg 선택').closest('li')
+    await waitFor(() => expect(within(orphanItem).getByText('미사용')).toBeInTheDocument())
+    expect(within(usedItem).queryByText('미사용')).not.toBeInTheDocument()
+  })
+
+  it('site_content 조회 실패 시 에러 상태로 전환된다', async () => {
+    mockStorage({ root: [{ id: '1', name: 'a.jpg', updated_at: new Date().toISOString(), metadata: { size: 1024 } }] })
+    supabase.from.mockReturnValue({
+      select: vi.fn().mockResolvedValue({ data: null, error: { message: '실패' } }),
+    })
+
+    render(<StorageUsage />)
+
+    await screen.findByText('데이터를 불러오지 못했습니다.')
   })
 })
