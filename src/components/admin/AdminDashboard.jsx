@@ -14,6 +14,7 @@ import PersonalityForm from './sections/PersonalityForm'
 import ContactForm from './sections/ContactForm'
 import AccountForm from './sections/AccountForm'
 import VisitorAnalytics from './sections/VisitorAnalytics'
+import StorageUsage from './sections/StorageUsage'
 
 const SECTIONS = [
   { key: 'hero', label: 'Hero', Form: HeroForm },
@@ -27,10 +28,11 @@ const SECTIONS = [
   { key: 'personality', label: 'Personality', Form: PersonalityForm },
   { key: 'contact', label: 'Contact', Form: ContactForm },
   { key: 'analytics', label: '방문자 분석' },
+  { key: 'storage', label: '스토리지 사용량' },
   { key: 'account', label: '계정 설정' },
 ]
 
-const NO_CONTENT_KEYS = ['account', 'analytics']
+const NO_CONTENT_KEYS = ['account', 'analytics', 'storage']
 
 export default function AdminDashboard() {
   const { signOut } = useAuth()
@@ -88,6 +90,7 @@ export default function AdminDashboard() {
         <main className="flex-1 p-8 max-w-2xl">
           {activeKey === 'account' && <AccountForm />}
           {activeKey === 'analytics' && <VisitorAnalytics />}
+          {activeKey === 'storage' && <StorageUsage />}
           {!NO_CONTENT_KEYS.includes(activeKey) && !loading && data && active && (
             <active.Form data={data} onSave={handleSave} />
           )}

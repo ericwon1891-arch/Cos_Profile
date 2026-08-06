@@ -1,11 +1,12 @@
 import { supabase } from '../../../lib/supabaseClient'
+import { buildUploadPath } from '../../../lib/uploadPath'
 
 export default function ImageField({ label, value, onChange, hint }) {
   async function handleFileChange(e) {
     const file = e.target.files[0]
     if (!file) return
 
-    const path = `${Date.now()}-${file.name}`
+    const path = buildUploadPath(file.name)
     const { error } = await supabase.storage.from('media').upload(path, file)
     if (error) {
       const isTooLarge = error.statusCode === '413' || /exceeded|too large/i.test(error.message)
