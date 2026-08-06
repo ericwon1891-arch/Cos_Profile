@@ -97,6 +97,16 @@ export default function StorageUsage() {
     setReloadToken(t => t + 1)
   }
 
+  async function handleEmptyTrash() {
+    const names = state.trashFiles.map(f => f.name)
+    const { error } = await supabase.storage.from('media').remove(names)
+    if (error) {
+      alert(`작업 실패: ${describeStorageActionError(error)}`)
+      return
+    }
+    setReloadToken(t => t + 1)
+  }
+
   if (state.loading) {
     return <p className="text-gray-500 text-sm">불러오는 중...</p>
   }
@@ -181,6 +191,7 @@ export default function StorageUsage() {
         files={trashList}
         onRestore={handleRestore}
         onPermanentDelete={handlePermanentDelete}
+        onEmptyTrash={handleEmptyTrash}
       />
     </div>
   )

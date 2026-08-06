@@ -71,4 +71,49 @@ describe('StorageTrash', () => {
 
     confirmSpy.mockRestore()
   })
+
+  it('"휴지통 비우기" 버튼을 클릭+확인하면 onEmptyTrash를 호출한다', async () => {
+    mockGetPublicUrl()
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const onEmptyTrash = vi.fn().mockResolvedValue()
+
+    render(
+      <StorageTrash
+        files={[
+          { name: 'trash/a.jpg', size: 1024, updatedAt: new Date().toISOString() },
+          { name: 'trash/b.jpg', size: 1024, updatedAt: new Date().toISOString() },
+        ]}
+        onRestore={vi.fn()}
+        onPermanentDelete={vi.fn()}
+        onEmptyTrash={onEmptyTrash}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '휴지통 비우기' }))
+
+    expect(confirmSpy).toHaveBeenCalledWith('휴지통의 파일 2개를 전부 영구 삭제할까요? 되돌릴 수 없습니다.')
+    await waitFor(() => expect(onEmptyTrash).toHaveBeenCalled())
+
+    confirmSpy.mockRestore()
+  })
+
+  it('"휴지통 비우기" 확인 대화상자에서 취소하면 onEmptyTrash를 호출하지 않는다', () => {
+    mockGetPublicUrl()
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
+    const onEmptyTrash = vi.fn()
+
+    render(
+      <StorageTrash
+        files={[{ name: 'trash/a.jpg', size: 1024, updatedAt: new Date().toISOString() }]}
+        onRestore={vi.fn()}
+        onPermanentDelete={vi.fn()}
+        onEmptyTrash={onEmptyTrash}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '휴지통 비우기' }))
+
+    expect(onEmptyTrash).not.toHaveBeenCalled()
+    confirmSpy.mockRestore()
+  })
 })
