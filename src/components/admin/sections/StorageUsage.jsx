@@ -76,12 +76,24 @@ export default function StorageUsage() {
       {largest.length === 0 && <p className="text-sm text-gray-400">파일이 없습니다.</p>}
       {largest.length > 0 && (
         <ul className="space-y-1">
-          {largest.map(f => (
-            <li key={f.name} className="flex justify-between text-sm border-b py-1">
-              <span className="truncate">{f.name}</span>
-              <span className="text-gray-500">{formatBytes(f.size)}</span>
-            </li>
-          ))}
+          {largest.map(f => {
+            const publicUrl = supabase.storage.from('media').getPublicUrl(f.name).data.publicUrl
+            return (
+              <li key={f.name} className="flex items-center justify-between text-sm border-b py-1">
+                <span className="flex items-center gap-2 min-w-0">
+                  <a href={publicUrl} target="_blank" rel="noreferrer">
+                    <img
+                      src={publicUrl}
+                      alt={f.name}
+                      className="w-10 h-10 object-cover rounded shrink-0"
+                    />
+                  </a>
+                  <span className="truncate">{f.name}</span>
+                </span>
+                <span className="text-gray-500 shrink-0">{formatBytes(f.size)}</span>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>
