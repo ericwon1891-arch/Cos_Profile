@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import StorageFileList from '../admin/sections/StorageFileList'
 import { supabase } from '../../lib/supabaseClient'
 
@@ -67,5 +67,27 @@ describe('StorageFileList', () => {
 
     expect(onDelete).not.toHaveBeenCalled()
     confirmSpy.mockRestore()
+  })
+
+  it('usedPaths에 없는 파일에는 "미사용" 배지를 표시한다', () => {
+    mockGetPublicUrl()
+    render(
+      <StorageFileList
+        files={[{ name: 'used.jpg', size: 1024 }, { name: 'orphan.jpg', size: 1024 }]}
+        usedPaths={new Set(['used.jpg'])}
+        onDelete={vi.fn()}
+      />
+    )
+
+    const usedItem = screen.getByText('used.jpg').closest('li')
+    const orphanItem = screen.getByText('orphan.jpg').closest('li')
+    expect(within(usedItem).queryByText('미사용')).not.toBeInTheDocument()
+    expect(within(orphanItem).getByText('미사용')).toBeInTheDocument()
+  })
+
+  it('usedPaths를 생략하면 모든 파일에 "미사용" 배지를 표시한다', () => {
+    mockGetPublicUrl()
+    render(<StorageFileList files={[{ name: 'a.jpg', size: 1024 }]} onDelete={vi.fn()} />)
+    expect(screen.getByText('미사용')).toBeInTheDocument()
   })
 })

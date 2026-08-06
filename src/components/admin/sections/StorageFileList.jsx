@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../../../lib/supabaseClient'
 import { formatBytes } from '../../../lib/storageUsage'
 
-export default function StorageFileList({ files, onDelete }) {
+export default function StorageFileList({ files, usedPaths = new Set(), onDelete }) {
   const [selected, setSelected] = useState([])
 
   function toggle(name) {
@@ -52,6 +52,11 @@ export default function StorageFileList({ files, onDelete }) {
                   />
                 </a>
                 <span className="truncate">{f.name}</span>
+                {!usedPaths.has(f.name) && (
+                  <span className="text-xs text-orange-600 border border-orange-300 rounded px-1 shrink-0">
+                    미사용
+                  </span>
+                )}
               </span>
               <span className="text-gray-500 shrink-0">{formatBytes(f.size)}</span>
             </li>
