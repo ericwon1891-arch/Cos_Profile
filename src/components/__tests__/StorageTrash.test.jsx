@@ -10,7 +10,7 @@ function mockGetPublicUrl() {
   const getPublicUrl = vi.fn((name, options) => ({
     data: {
       publicUrl: options?.transform
-        ? `https://example.com/storage/v1/render/image/public/media/${name}?width=${options.transform.width}&height=${options.transform.height}`
+        ? `https://example.com/storage/v1/render/image/public/media/${name}?width=${options.transform.width}&height=${options.transform.height}&quality=${options.transform.quality}`
         : `https://example.com/storage/v1/object/public/media/${name}`,
     },
   }))
@@ -53,7 +53,7 @@ describe('StorageTrash', () => {
     const img = screen.getByAltText('a.jpg')
     expect(img).toHaveAttribute(
       'src',
-      'https://example.com/storage/v1/render/image/public/media/trash/a.jpg?width=80&height=80'
+      'https://example.com/storage/v1/render/image/public/media/trash/a.jpg?width=80&height=80&quality=50'
     )
     expect(img).toHaveAttribute('loading', 'lazy')
     expect(img).toHaveAttribute('decoding', 'async')

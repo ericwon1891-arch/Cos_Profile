@@ -14,7 +14,7 @@ function mockStorage({ root = [], trash = [], content = [] } = {}) {
   const getPublicUrl = vi.fn((name, options) => ({
     data: {
       publicUrl: options?.transform
-        ? `https://example.com/storage/v1/render/image/public/media/${name}?width=${options.transform.width}&height=${options.transform.height}`
+        ? `https://example.com/storage/v1/render/image/public/media/${name}?width=${options.transform.width}&height=${options.transform.height}&quality=${options.transform.quality}`
         : `https://example.com/storage/v1/object/public/media/${name}`,
     },
   }))
@@ -90,7 +90,7 @@ describe('StorageUsage', () => {
     const img = screen.getByAltText('big.jpg')
     expect(img).toHaveAttribute(
       'src',
-      'https://example.com/storage/v1/render/image/public/media/big.jpg?width=80&height=80'
+      'https://example.com/storage/v1/render/image/public/media/big.jpg?width=80&height=80&quality=50'
     )
     expect(img).toHaveAttribute('loading', 'lazy')
     expect(img).toHaveAttribute('decoding', 'async')
