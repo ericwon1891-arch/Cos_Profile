@@ -6,27 +6,53 @@ import {
   formatBytes,
   usagePercent,
   topLargestFiles,
+  isFolderPlaceholder,
+  isExpired,
+  stripTrashPrefix,
+  describeStorageActionError,
   STORAGE_LIMIT_GB,
+  TRASH_PREFIX,
 } from '../../../lib/storageUsage'
+import StorageFileList from './StorageFileList'
+import StorageTrash from './StorageTrash'
 
 export default function StorageUsage() {
   const [reloadToken, setReloadToken] = useState(0)
-  const [state, setState] = useState({ files: null, loading: true, error: null })
+  const [showAllFiles, setShowAllFiles] = useState(false)
+  const [state, setState] = useState({ rootFiles: null, trashFiles: null, loading: true, error: null })
 
   useEffect(() => {
     let cancelled = false
-    setState({ files: null, loading: true, error: null })
+    setState({ rootFiles: null, trashFiles: null, loading: true, error: null })
 
     async function fetchFiles() {
       try {
-        const files = await fetchAllStorageFiles((offset, limit) =>
-          supabase.storage.from('media').list('', { limit, offset, sortBy: { column: 'name', order: 'asc' } })
-        )
+        const [rootRaw, trashRaw] = await Promise.all([
+          fetchAllStorageFiles((offset, limit) =>
+            supabase.storage.from('media').list('', { limit, offset, sortBy: { column: 'name', order: 'asc' } })
+          ),
+          fetchAllStorageFiles((offset, limit) =>
+            supabase.storage.from('media').list('trash', { limit, offset, sortBy: { column: 'name', order: 'asc' } })
+          ),
+        ])
+
+        const rootFiles = rootRaw.filter(f => !isFolderPlaceholder(f))
+        const trashPrefixed = trashRaw
+          .filter(f => !isFolderPlaceholder(f))
+          .map(f => ({ ...f, name: `${TRASH_PREFIX}${f.name}` }))
+
+        const expired = trashPrefixed.filter(f => isExpired(f.updated_at))
+        const active = trashPrefixed.filter(f => !isExpired(f.updated_at))
+
+        if (expired.length > 0) {
+          await supabase.storage.from('media').remove(expired.map(f => f.name))
+        }
+
         if (cancelled) return
-        setState({ files, loading: false, error: null })
+        setState({ rootFiles, trashFiles: active, loading: false, error: null })
       } catch (error) {
         if (cancelled) return
-        setState({ files: null, loading: false, error })
+        setState({ rootFiles: null, trashFiles: null, loading: false, error })
       }
     }
 
@@ -34,6 +60,35 @@ export default function StorageUsage() {
 
     return () => { cancelled = true }
   }, [reloadToken])
+
+  async function moveFiles(names, toTrash) {
+    for (const name of names) {
+      const targetPath = toTrash ? `${TRASH_PREFIX}${name}` : stripTrashPrefix(name)
+      const { error } = await supabase.storage.from('media').move(name, targetPath)
+      if (error) {
+        alert(`작업 실패: ${describeStorageActionError(error)}`)
+        return
+      }
+    }
+    setReloadToken(t => t + 1)
+  }
+
+  async function handleDelete(names) {
+    await moveFiles(names, true)
+  }
+
+  async function handleRestore(trashName) {
+    await moveFiles([trashName], false)
+  }
+
+  async function handlePermanentDelete(trashName) {
+    const { error } = await supabase.storage.from('media').remove([trashName])
+    if (error) {
+      alert(`작업 실패: ${describeStorageActionError(error)}`)
+      return
+    }
+    setReloadToken(t => t + 1)
+  }
 
   if (state.loading) {
     return <p className="text-gray-500 text-sm">불러오는 중...</p>
@@ -54,10 +109,14 @@ export default function StorageUsage() {
     )
   }
 
-  const files = state.files
-  const usedBytes = totalBytes(files)
+  const { rootFiles, trashFiles } = state
+  const usedBytes = totalBytes(rootFiles) + totalBytes(trashFiles)
   const percent = usagePercent(usedBytes, STORAGE_LIMIT_GB)
-  const largest = topLargestFiles(files, 10)
+  const largest = topLargestFiles(rootFiles, 10)
+  const allFiles = topLargestFiles(rootFiles, rootFiles.length)
+  const trashList = trashFiles
+    .map(f => ({ name: f.name, size: f.metadata?.size ?? 0, updatedAt: f.updated_at }))
+    .sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt))
 
   return (
     <div>
@@ -75,7 +134,7 @@ export default function StorageUsage() {
       <h3 className="text-sm font-medium text-gray-700 mb-2">용량 큰 파일 Top 10</h3>
       {largest.length === 0 && <p className="text-sm text-gray-400">파일이 없습니다.</p>}
       {largest.length > 0 && (
-        <ul className="space-y-1">
+        <ul className="space-y-1 mb-8">
           {largest.map(f => {
             const publicUrl = supabase.storage.from('media').getPublicUrl(f.name).data.publicUrl
             return (
@@ -96,6 +155,26 @@ export default function StorageUsage() {
           })}
         </ul>
       )}
+
+      <button
+        type="button"
+        onClick={() => setShowAllFiles(v => !v)}
+        className="mb-2 text-sm underline"
+      >
+        {showAllFiles ? '전체 파일 접기' : '전체 파일 보기'}
+      </button>
+      {showAllFiles && (
+        <div className="mb-8">
+          <StorageFileList files={allFiles} onDelete={handleDelete} />
+        </div>
+      )}
+
+      <h3 className="text-sm font-medium text-gray-700 mb-2">휴지통 (14일 후 자동 삭제)</h3>
+      <StorageTrash
+        files={trashList}
+        onRestore={handleRestore}
+        onPermanentDelete={handlePermanentDelete}
+      />
     </div>
   )
 }

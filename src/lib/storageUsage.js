@@ -34,3 +34,34 @@ export function topLargestFiles(files, limit = 10) {
     .sort((a, b) => b.size - a.size)
     .slice(0, limit)
 }
+
+export const TRASH_PREFIX = 'trash/'
+export const TRASH_RETENTION_DAYS = 14
+
+export function isFolderPlaceholder(file) {
+  return file.id === null
+}
+
+export function stripTrashPrefix(name) {
+  return name.startsWith(TRASH_PREFIX) ? name.slice(TRASH_PREFIX.length) : name
+}
+
+export function daysUntilExpiry(updatedAt, now = Date.now()) {
+  const elapsedMs = now - new Date(updatedAt).getTime()
+  const elapsedDays = Math.floor(elapsedMs / (1000 * 60 * 60 * 24))
+  return TRASH_RETENTION_DAYS - elapsedDays
+}
+
+export function isExpired(updatedAt, now = Date.now()) {
+  return daysUntilExpiry(updatedAt, now) <= 0
+}
+
+export function describeStorageActionError(error) {
+  if (/row-level security|not authorized|unauthorized/i.test(error.message)) {
+    return '로그인이 만료되었습니다. 새로고침 후 다시 로그인해 주세요.'
+  }
+  if (/network|failed to fetch/i.test(error.message)) {
+    return '인터넷 연결을 확인해 주세요.'
+  }
+  return `문제가 계속되면 관리자에게 문의해 주세요. (${error.message})`
+}

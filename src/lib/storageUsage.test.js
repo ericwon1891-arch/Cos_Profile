@@ -1,4 +1,15 @@
-import { fetchAllStorageFiles, totalBytes, formatBytes, usagePercent, topLargestFiles } from './storageUsage'
+import {
+  fetchAllStorageFiles,
+  totalBytes,
+  formatBytes,
+  usagePercent,
+  topLargestFiles,
+  isFolderPlaceholder,
+  stripTrashPrefix,
+  daysUntilExpiry,
+  isExpired,
+  describeStorageActionError,
+} from './storageUsage'
 
 describe('fetchAllStorageFiles', () => {
   it('전체 결과가 페이지 크기보다 작으면 한 번만 호출한다', async () => {
@@ -62,5 +73,79 @@ describe('topLargestFiles', () => {
       { name: 'b', size: 30 },
       { name: 'c', size: 20 },
     ])
+  })
+})
+
+describe('isFolderPlaceholder', () => {
+  it('id가 null이면 폴더 플레이스홀더로 판별한다', () => {
+    expect(isFolderPlaceholder({ id: null, name: 'trash' })).toBe(true)
+  })
+
+  it('id가 있으면 폴더 플레이스홀더가 아니다', () => {
+    expect(isFolderPlaceholder({ id: 'abc', name: 'a.jpg' })).toBe(false)
+  })
+})
+
+describe('stripTrashPrefix', () => {
+  it('trash/ 접두사를 제거한다', () => {
+    expect(stripTrashPrefix('trash/1700000000000.jpg')).toBe('1700000000000.jpg')
+  })
+
+  it('trash/ 접두사가 없으면 그대로 반환한다', () => {
+    expect(stripTrashPrefix('1700000000000.jpg')).toBe('1700000000000.jpg')
+  })
+})
+
+describe('daysUntilExpiry', () => {
+  it('13일 지났으면 1일 남았다고 계산한다', () => {
+    const now = Date.parse('2026-08-20T00:00:00Z')
+    const updatedAt = new Date(now - 13 * 24 * 60 * 60 * 1000).toISOString()
+    expect(daysUntilExpiry(updatedAt, now)).toBe(1)
+  })
+
+  it('정확히 14일 지났으면 0을 반환한다', () => {
+    const now = Date.parse('2026-08-20T00:00:00Z')
+    const updatedAt = new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString()
+    expect(daysUntilExpiry(updatedAt, now)).toBe(0)
+  })
+
+  it('15일 지났으면 음수를 반환한다', () => {
+    const now = Date.parse('2026-08-20T00:00:00Z')
+    const updatedAt = new Date(now - 15 * 24 * 60 * 60 * 1000).toISOString()
+    expect(daysUntilExpiry(updatedAt, now)).toBe(-1)
+  })
+})
+
+describe('isExpired', () => {
+  it('daysUntilExpiry가 0 이하면 true를 반환한다', () => {
+    const now = Date.parse('2026-08-20T00:00:00Z')
+    const updatedAt = new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString()
+    expect(isExpired(updatedAt, now)).toBe(true)
+  })
+
+  it('daysUntilExpiry가 양수면 false를 반환한다', () => {
+    const now = Date.parse('2026-08-20T00:00:00Z')
+    const updatedAt = new Date(now - 13 * 24 * 60 * 60 * 1000).toISOString()
+    expect(isExpired(updatedAt, now)).toBe(false)
+  })
+})
+
+describe('describeStorageActionError', () => {
+  it('row-level security 메시지면 로그인 만료 안내를 반환한다', () => {
+    expect(
+      describeStorageActionError({ message: 'new row violates row-level security policy' })
+    ).toBe('로그인이 만료되었습니다. 새로고침 후 다시 로그인해 주세요.')
+  })
+
+  it('네트워크 관련 메시지면 인터넷 연결 안내를 반환한다', () => {
+    expect(describeStorageActionError({ message: 'Failed to fetch' })).toBe(
+      '인터넷 연결을 확인해 주세요.'
+    )
+  })
+
+  it('분류되지 않는 에러는 관리자 문의 안내와 원본 메시지를 함께 반환한다', () => {
+    expect(describeStorageActionError({ message: '알 수 없는 서버 오류' })).toBe(
+      '문제가 계속되면 관리자에게 문의해 주세요. (알 수 없는 서버 오류)'
+    )
   })
 })
