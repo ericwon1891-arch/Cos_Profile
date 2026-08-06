@@ -90,4 +90,54 @@ describe('StorageFileList', () => {
     render(<StorageFileList files={[{ name: 'a.jpg', size: 1024 }]} onDelete={vi.fn()} />)
     expect(screen.getByText('미사용')).toBeInTheDocument()
   })
+
+  it('미사용 파일이 없으면 "미사용 파일 정리" 버튼이 보이지 않는다', () => {
+    mockGetPublicUrl()
+    render(
+      <StorageFileList
+        files={[{ name: 'used.jpg', size: 1024 }]}
+        usedPaths={new Set(['used.jpg'])}
+        onDelete={vi.fn()}
+      />
+    )
+    expect(screen.queryByRole('button', { name: /미사용 파일 정리/ })).not.toBeInTheDocument()
+  })
+
+  it('"미사용 파일 정리(N)" 버튼을 클릭+확인하면 미사용 파일 전체로 onDelete를 호출한다', async () => {
+    mockGetPublicUrl()
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const onDelete = vi.fn().mockResolvedValue()
+
+    render(
+      <StorageFileList
+        files={[
+          { name: 'used.jpg', size: 1024 },
+          { name: 'orphan1.jpg', size: 1024 },
+          { name: 'orphan2.jpg', size: 1024 },
+        ]}
+        usedPaths={new Set(['used.jpg'])}
+        onDelete={onDelete}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '미사용 파일 정리(2)' }))
+
+    expect(confirmSpy).toHaveBeenCalledWith('미사용 파일 2개를 휴지통으로 이동할까요?')
+    await waitFor(() => expect(onDelete).toHaveBeenCalledWith(['orphan1.jpg', 'orphan2.jpg']))
+
+    confirmSpy.mockRestore()
+  })
+
+  it('"미사용 파일 정리" 확인 대화상자에서 취소하면 onDelete를 호출하지 않는다', () => {
+    mockGetPublicUrl()
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
+    const onDelete = vi.fn()
+
+    render(<StorageFileList files={[{ name: 'orphan.jpg', size: 1024 }]} onDelete={onDelete} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '미사용 파일 정리(1)' }))
+
+    expect(onDelete).not.toHaveBeenCalled()
+    confirmSpy.mockRestore()
+  })
 })

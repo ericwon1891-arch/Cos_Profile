@@ -4,6 +4,7 @@ import { formatBytes } from '../../../lib/storageUsage'
 
 export default function StorageFileList({ files, usedPaths = new Set(), onDelete }) {
   const [selected, setSelected] = useState([])
+  const unusedNames = files.filter(f => !usedPaths.has(f.name)).map(f => f.name)
 
   function toggle(name) {
     setSelected(prev =>
@@ -17,6 +18,11 @@ export default function StorageFileList({ files, usedPaths = new Set(), onDelete
     setSelected([])
   }
 
+  async function handleCleanupUnusedClick() {
+    if (!confirm(`미사용 파일 ${unusedNames.length}개를 휴지통으로 이동할까요?`)) return
+    await onDelete(unusedNames)
+  }
+
   if (files.length === 0) {
     return <p className="text-sm text-gray-400">파일이 없습니다.</p>
   }
@@ -27,9 +33,18 @@ export default function StorageFileList({ files, usedPaths = new Set(), onDelete
         <button
           type="button"
           onClick={handleDeleteClick}
-          className="mb-2 text-sm text-red-600 underline"
+          className="mb-2 mr-2 text-sm text-red-600 underline"
         >
           선택 삭제({selected.length})
+        </button>
+      )}
+      {unusedNames.length > 0 && (
+        <button
+          type="button"
+          onClick={handleCleanupUnusedClick}
+          className="mb-2 text-sm text-orange-600 underline"
+        >
+          미사용 파일 정리({unusedNames.length})
         </button>
       )}
       <ul className="space-y-1">
