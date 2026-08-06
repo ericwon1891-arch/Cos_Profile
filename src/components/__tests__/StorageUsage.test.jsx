@@ -230,4 +230,24 @@ describe('StorageUsage', () => {
 
     await screen.findByText('데이터를 불러오지 못했습니다.')
   })
+
+  it('"휴지통 비우기"를 클릭하면 휴지통의 모든 파일을 한 번에 영구 삭제한다', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const { remove } = mockStorage({
+      trash: [
+        { id: '1', name: 'a.jpg', updated_at: new Date().toISOString(), metadata: { size: 1024 } },
+        { id: '2', name: 'b.jpg', updated_at: new Date().toISOString(), metadata: { size: 1024 } },
+      ],
+    })
+
+    render(<StorageUsage />)
+
+    await waitFor(() => screen.getByRole('button', { name: '휴지통 비우기' }))
+    fireEvent.click(screen.getByRole('button', { name: '휴지통 비우기' }))
+
+    await waitFor(() =>
+      expect(remove).toHaveBeenCalledWith(expect.arrayContaining(['trash/a.jpg', 'trash/b.jpg']))
+    )
+    confirmSpy.mockRestore()
+  })
 })
